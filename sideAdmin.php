@@ -1,3 +1,5 @@
+<!DOCTYPE html>
+
 <div class="sideNav">
     <ul>
         <li id="menu"><p>MENU</p></li>
@@ -8,7 +10,7 @@
         <hr>
         <li><a href="../admin/admList.php" class="side">Administrator List</a></li>
         <hr>
-        <li><a href="../general/journals.php" class="side">Download Journals</a></li>
+        <li><a href="../general/journals.php" class="side">Journals Download</a></li>
         <hr>
     </ul>
 </div>
