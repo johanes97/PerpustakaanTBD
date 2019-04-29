@@ -34,7 +34,8 @@ create table bukukata(
 );
 create table eksemplar(
 	ideksemplar int not null primary key,
-	idbuku int, foreign key (idbuku) references buku(idbuku)
+	idbuku int, foreign key (idbuku) references buku(idbuku),
+	status int not null
 );
 
 --Bagian Peminjaman
@@ -62,5 +63,5 @@ create table peminjaman(
 	tglpengembalian date,
 	bataspengembalian date not null,
 	durasihariterlambat int,
-	besardenda int
+	besardenda money
 );
