@@ -3,7 +3,7 @@
         protected $servername = "localhost";
         protected $username = "root";
         protected $password = "";
-        protected $dbname = "tugasbesarpbw2";   
+        protected $dbname = "perpustakaantbd";   
 
         protected $db_connection;
     
