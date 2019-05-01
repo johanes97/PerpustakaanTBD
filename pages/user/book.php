@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 
 <?php
-	include ('../../OpenConnection.php');
+	include('../../OpenConnection.php');
 ?>
 
 <?php
@@ -10,7 +10,7 @@
 					FROM 
 						buku
 						inner join bukupengarang on buku.idbuku = bukupengarang.idbuku
-						inner join pengarang on pengarang.idpengarang = bukupengarang.idpengarang;";
+						inner join pengarang on pengarang.idpengarang = bukupengarang.idpengarang";
 	$query = $conn->getQuery();
 
 	if(isset($_GET['iSearch'])){
@@ -19,16 +19,13 @@
 
 		$queryCari="";
 		if($pilihan == 'judul'){
-			$queryCari = " WHERE judulbuku = '$textInput'";
-
-		}
-		else if($pilihan == 'tag'){
-			$queryCari = " WHERE namatag = '$textInput'";
-
+			$queryCari = " WHERE judulbuku LIKE '%$textInput%'";
 		}
 		else if($pilihan == 'pengarang'){
-			$queryCari = " WHERE namapengarang = '$textInput'";
-			
+			$queryCari = " WHERE namapengarang LIKE '%$textInput%'";	
+		}
+		else if($pilihan == 'tag'){
+			$queryCari = " WHERE namatag LIKE '%$textInput%'";
 		}
 		if($textInput == "") $queryCari="";
 		$queryShowBook .= $queryCari;
