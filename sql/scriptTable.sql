@@ -63,5 +63,5 @@ create table peminjaman(
 	tglpengembalian date,
 	bataspengembalian date not null,
 	durasihariterlambat int,
-	besardenda money
+	besardenda int
 );

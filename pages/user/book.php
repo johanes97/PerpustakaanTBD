@@ -5,12 +5,12 @@
 ?>
 
 <?php
-	$queryShowBook="SELECT DISTINCT 
-						* 
+	$queryShowBook="SELECT DISTINCT
+						*
 					FROM 
-						buku left outer join kategori_buku 
-						on kategori_buku.id_buku = buku.id_buku inner join kategori 
-						on kategori_buku.id_kategori = kategori.id_kategori";
+						buku
+						inner join bukupengarang on buku.idbuku = bukupengarang.idbuku
+						inner join pengarang on pengarang.idpengarang = bukupengarang.idpengarang;";
 	$query = $conn->getQuery();
 
 	if(isset($_GET['iSearch'])){
@@ -19,19 +19,15 @@
 
 		$queryCari="";
 		if($pilihan == 'judul'){
-			$queryCari = " WHERE judul = '$textInput'";
+			$queryCari = " WHERE judulbuku = '$textInput'";
 
 		}
-		else if($pilihan == 'kategori'){
-			$queryCari = " WHERE nama_kategori = '$textInput'";
+		else if($pilihan == 'tag'){
+			$queryCari = " WHERE namatag = '$textInput'";
 
 		}
 		else if($pilihan == 'pengarang'){
-			$queryCari = " WHERE pengarang = '$textInput'";
-			
-		}
-		else if($pilihan == 'penerbit'){
-			$queryCari = " WHERE penerbit = '$textInput'";
+			$queryCari = " WHERE namapengarang = '$textInput'";
 			
 		}
 		if($textInput == "") $queryCari="";
@@ -63,31 +59,26 @@
 			<div class="article">
 				<div class="opening2"><p id="judul">Book List</p>
 					<form class="pilihanCari" action="">
-						<input type="text" name="textInput" placeholder="Search books." class="cari">
+						<input type="text" name="textInput" placeholder="Search books..." class="cari">
 						<span class="cari" id="by"><pre> by </pre></span>
 						<select name="pilihan" class="cari">
-							<option value="judul">Tittle</option>
-							<option value="kategori">Category</option>
+							<option value="judul">Title</option>
+							<option value="tag">Tag</option>
 							<option value="pengarang">Author</option>
-							<option value="penerbit">Publisher</option>
 						</select>
 						<input id="button" name="iSearch" type="submit" value="SEARCH" class="cari">
 					</form>
 				</div>
 				<div class="main">
 					<table>
-						<tr><th>Code</th><th>Title</th><th>Author</th><th>Publication Year</th>
-						<th>Publisher</th><th>Nama Kategori</th></tr>
+						<tr><th>Book ID</th><th>Book Title</th><th>Author</th></tr>
 						<?php
 							if($result = $query->query($queryShowBook)){
 								while($row = $result->fetch_array()){
 									echo "<tr>";
-									echo "<td>".$row['id_buku']."</td>";
-									echo "<td>".$row['judul']."</td>";
-									echo "<td>".$row['pengarang']."</td>";
-									echo "<td>".$row['tahun_terbit']."</td>";
-									echo "<td>".$row['penerbit']."</td>";
-									echo "<td>".$row['nama_kategori']."</td>";
+									echo "<td>" . $row['idbuku'] . "</td>";
+									echo "<td>" . $row['judulbuku'] . "</td>";
+									echo "<td>" . $row['namapengarang'] . "</td>";
 									echo "</tr>";
 								}
 							}
@@ -95,7 +86,7 @@
 					</table>
 				</div>
 				<div class="closing">
-					<p>&copy; 2016 Maria Veronica - eLibrary fow Web Based Programming</p>
+					<p>&copy; 2019 JFA - eLibrary for Database Technology</p>
 				</div>
 			</div>
 		</div>
