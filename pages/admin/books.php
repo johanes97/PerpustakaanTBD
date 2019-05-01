@@ -5,12 +5,12 @@
 ?>
 
 <?php
-	$queryShowBook="SELECT DISTINCT 
-						* 
+	$queryShowBook="SELECT DISTINCT
+						*
 					FROM 
-						buku left outer join kategori_buku 
-						on kategori_buku.id_buku = buku.id_buku inner join kategori 
-						on kategori_buku.id_kategori = kategori.id_kategori";
+						buku
+						inner join bukupengarang on buku.idbuku = bukupengarang.idbuku
+						inner join pengarang on pengarang.idpengarang = bukupengarang.idpengarang";
 	$query = $conn->getQuery();
 
 	if(isset($_GET['iSearch'])){
@@ -19,20 +19,13 @@
 
 		$queryCari="";
 		if($pilihan == 'judul'){
-			$queryCari = " WHERE judul = '$textInput'";
-
-		}
-		else if($pilihan == 'kategori'){
-			$queryCari = " WHERE nama_kategori = '$textInput'";
-
+			$queryCari = " WHERE judulbuku LIKE '%$textInput%'";
 		}
 		else if($pilihan == 'pengarang'){
-			$queryCari = " WHERE pengarang = '$textInput'";
-			
+			$queryCari = " WHERE namapengarang LIKE '%$textInput%'";	
 		}
-		else if($pilihan == 'penerbit'){
-			$queryCari = " WHERE penerbit = '$textInput'";
-			
+		else if($pilihan == 'tag'){
+			$queryCari = " WHERE namatag LIKE '%$textInput%'";
 		}
 		if($textInput == "") $queryCari="";
 		$queryShowBook .= $queryCari;
@@ -65,10 +58,9 @@
 						<input type="text" name="textInput" placeholder="Search books." class="cari">
 						<span class="cari" id="by"><pre> by </pre></span>
 						<select name="pilihan" class="cari">
-							<option value="judul">Tittle</option>
-							<option value="kategori">Category</option>
+							<option value="judul">Title</option>
+							<option value="kategori">Tag</option>
 							<option value="pengarang">Author</option>
-							<option value="penerbit">Publisher</option>
 						</select>
 						<input id="button" name="iSearch" type="submit" value="SEARCH" class="cari">
 						<input id="button2" name="iAdd" type="submit" value="ADD BOOK" class="cari">
@@ -77,18 +69,14 @@
 				<div class="main">
 					<p id="tambahBuku"></p>
 					<table>
-						<tr><th>Code</th><th>Title</th><th>Author</th><th>Publication Year</th>
-						<th>Publisher</th><th>Nama Kategori</th></tr>
+						<tr><th>Book ID</th><th>Book Title</th><th>Author</th></tr>
 						<?php
 							if($result = $query->query($queryShowBook)){
 								while($row = $result->fetch_array()){
 									echo "<tr>";
-									echo "<td>".$row['id_buku']."</td>";
-									echo "<td>".$row['judul']."</td>";
-									echo "<td>".$row['pengarang']."</td>";
-									echo "<td>".$row['tahun_terbit']."</td>";
-									echo "<td>".$row['penerbit']."</td>";
-									echo "<td>".$row['nama_kategori']."</td>";
+									echo "<td>" . $row['idbuku'] . "</td>";
+									echo "<td>" . $row['judulbuku'] . "</td>";
+									echo "<td>" . $row['namapengarang'] . "</td>";
 									echo "</tr>";
 								}
 							}
@@ -96,7 +84,7 @@
 					</table>
 				</div>
 				<div class="closing">
-					<p>&copy; 2016 Maria Veronica - eLibrary fow Web Based Programming</p>
+					<p>&copy; 2019 JFA - eLibrary for Database Technology</p>
 				</div>
 			</div>
 		</div>
@@ -110,22 +98,9 @@
 			<fieldset>
 				<span onclick="document.getElementById('myModal').style.display='none'" class="close">&times;</span>
 				<span id="judulForm">Book Data</span>
-				<form action="">
+				<form method="get">
 					<div class="iForm"><input type="text" name="judul" placeholder="Title"></div>
 					<div class="iForm"><input type="text" name="pengarang" placeholder="Author"></div>
-					<div class="iForm"><input type="text" name="thnTerbit" placeholder="Publication Year"></div>
-					<div class="iForm"><input type="text" name="penerbit" placeholder="Publisher"></div>
-					<select name="kategori" class="iForm">
-						<?php
-						$queryKategori = "SELECT nama_kategori FROM kategori";
-							if($result = $query->query($queryKategori)){
-								while($row = $result->fetch_array()){
-									$kate = $row['nama_kategori'];
-									echo "<option value='$kate'>$kate</option>";
-								}
-							}
-						?>
-					</select>
 					<div class="tombol">
 						<div><input type="submit" value="ADD" class="iBForm" name="add"></div>
 					</div>
@@ -146,46 +121,45 @@
 </html>
 
 <?php
-	function generateCode($length=4){
-		$characters = '0a1q2E3p4hbK56F7ec8L9idUMoxyNgzXAnBCwrfDYTGsvkHItJOhPQujmRlVWSZ';
-		$charactersLength = strlen($characters);
-		$randomString = '';
-		for($i = 0; $i < $length; $i++){
-			$randomString .= $characters[rand(0,$charactersLength - 1)];
-		}
-		return $randomString;
-	}
 
 	if(isset($_GET['iAdd'])){
 		echo "<script>modalOn();</script>";
 	}
 	if(isset($_GET['add'])){ 
-		$idBuku=generateCode();
-		$judul = $_GET['judul']; $pengarang = $_GET['pengarang']; 
-		$thnTerbit = $_GET['thnTerbit'];$penerbit = $_GET['penerbit']; $kategori = $_GET['kategori'];
+		$judulbuku = $_GET['judul'];
+		$namapengarang = $_GET['pengarang'];
+		//$tag = $_GET['kategori'];
 
-		$queryCek="SELECT * FROM buku WHERE id_buku = $idBuku";
-		$resCek = $conn->executeQuery($queryCek);
-
-		if($resCek!=null){
-			while($resCek!=null){
-				$idBuku=generateCode();
-				$queryCek="SELECT * FROM buku WHERE id_buku = $idBuku";
-				$resCek = $conn->executeQuery($queryCek);
-			}
-		}
-
-		if($judul!=""&& $pengarang!="" && $thnTerbit!="" && $penerbit!="" &&$kategori!=""){
-			$queryInsertBook = "INSERT INTO buku 
-				VALUES ('$idBuku','$judul', '$pengarang', $thnTerbit, '$penerbit')";
+		if($judulbuku!="" && $namapengarang!=""){
+			$queryInsertBook = "INSERT INTO buku(judulbuku) VALUES('$judulbuku');";
+			$queryInsertPengarang = "INSERT INTO pengarang(namapengarang) VALUES('$namapengarang');";
 			$conn->executeNonQuery($queryInsertBook);
+			$conn->executeNonQuery($queryInsertPengarang);
+			
+			$queryGetIdBuku = "SELECT buku.idbuku
+								FROM buku
+								WHERE judulbuku LIKE '$judulbuku'";
+			$queryGetIdPengarang = "SELECT pengarang.idpengarang
+								FROM pengarang
+								WHERE namapengarang LIKE '$namapengarang'";
+			
+			$result = $query->query($queryGetIdBuku);
+			$row = $result->fetch_array();
+			$idbuku = $row['idbuku'];
+			
+			$result = $query->query($queryGetIdPengarang);
+			$row = $result->fetch_array();
+			$idpengarang = $row['idpengarang'];
+			
+			$queryInsertBukuPengarang = "INSERT INTO bukupengarang(idbuku,idpengarang) VALUES($idbuku,$idpengarang);";
+			$conn->executeNonQuery($queryInsertBukuPengarang);
 
-			$idKate = $conn->executeQuery("SELECT id_kategori FROM kategori WHERE nama_kategori = '$kategori'")[0][0];
-			$queryInsertKategori = "INSERT INTO kategori_buku 
-					VALUES ('$idBuku','$idKate')";
-			$conn->executeNonQuery($queryInsertKategori); 
+			//$idKate = $conn->executeQuery("SELECT id_kategori FROM kategori WHERE nama_kategori = '$kategori'")[0][0];
+			//$queryInsertKategori = "INSERT INTO kategori_buku 
+			//		VALUES ('$idBuku','$idKate')";
+			//$conn->executeNonQuery($queryInsertKategori); 
 
-			echo "<script>document.getElementById('tambahBuku').innerHTML = 'Book Added'</script>";
+			//echo "<script>document.getElementById('tambahBuku').innerHTML = 'Book Added'</script>";
 		}
 	}
 ?>
