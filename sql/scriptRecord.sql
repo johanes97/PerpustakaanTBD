@@ -63,7 +63,7 @@ values (5,1);
 insert into anggota(email,nama,sandi,tipe)
 values ('kasepSumasep@gmail.com','asep','sikasep123','admin');
 insert into anggota(email,nama,sandi,tipe)
-values ('irwanSiKasep@gmail.com','irwan','sayahandssome321','user_biasa');
+values ('irwanSiKasep@gmail.com','irwan','sayahandsome321','user_biasa');
 insert into anggota(email,nama,sandi,tipe)
 values ('alvinussutendy@gmail.com','alvinus','apaajaboleh','user_biasa');
 

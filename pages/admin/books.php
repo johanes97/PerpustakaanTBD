@@ -121,7 +121,6 @@
 </html>
 
 <?php
-
 	if(isset($_GET['iAdd'])){
 		echo "<script>modalOn();</script>";
 	}
@@ -159,7 +158,7 @@
 			//		VALUES ('$idBuku','$idKate')";
 			//$conn->executeNonQuery($queryInsertKategori); 
 
-			//echo "<script>document.getElementById('tambahBuku').innerHTML = 'Book Added'</script>";
+			echo "<script>document.getElementById('tambahBuku').innerHTML = 'Book Added'</script>";
 		}
 	}
 ?>

@@ -40,7 +40,7 @@
 				$query = $conn->getQuery();
 			?>
 			<div class="article">
-				<div class="opening2"><p id="judul">Borrowing History</p></div>
+				<div class="opening2"><p id="judul">Borrow</p></div>
 				<div class="main">
 					<table>
 						<tr><th>Book Code</th><th>Book Title</th><th>Author</th><th>Borrow Date</th>
