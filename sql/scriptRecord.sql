@@ -2,7 +2,7 @@
 
 --Buku
 insert into buku(judulbuku)
-values ('Algiritma dan Struktur Data');
+values ('Algoritma dan Struktur Data');
 insert into buku(judulbuku)
 values ('Introduction to Algorithm');
 insert into buku(judulbuku)
@@ -50,9 +50,23 @@ values
 
 
 --Anggota
+insert into anggota(email,nama,sandi,tipe)
+values ('kasepSumasep@gmail.com','asep','sikasep123','admin');
+insert into anggota(email,nama,sandi,tipe)
+values ('irwanSiKasep@gmail.com','irwan','sayahandssome321','user_biasa');
+insert into anggota(email,nama,sandi,tipe)
+values ('alvinussutendy@gmail.com','alvinus','apaajaboleh','user_biasa');
 
 --Denda
+insert into denda(tipedenda,tarif)
+values (5,5000);
+insert into denda(tipedenda,tarif)
+values (15,10000);
 
 --Pemesanan
+insert into pemesanan(email,idbuku,tglpemesanan)
+values ('irwanSiKasep@gmail.com',1,'2019-12-25');
+insert into pemesanan(email,idbuku,tglpemesanan)
+values ('irwanSiKasep@gmail.com',2,'2018-12-25');
 
 --Peminjaman
