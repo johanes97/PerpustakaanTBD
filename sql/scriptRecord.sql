@@ -41,6 +41,16 @@ insert into tag(namatag)
 values 
 
 --BukuPengarang
+insert into bukupengarang(idbuku,idpengarang)
+values (1,4);
+insert into bukupengarang(idbuku,idpengarang)
+values (2,4);
+insert into bukupengarang(idbuku,idpengarang)
+values (3,3);
+insert into bukupengarang(idbuku,idpengarang)
+values (4,5);
+insert into bukupengarang(idbuku,idpengarang)
+values (5,1);
 
 --BukuTag
 

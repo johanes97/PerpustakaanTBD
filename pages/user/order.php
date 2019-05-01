@@ -29,23 +29,24 @@
 											*
 										FROM 
 											buku
-											inner join peminjaman on buku.idbuku = peminjaman.idbuku
-											inner join anggota on peminjaman.email = anggota.email";
+											inner join pemesanan on buku.idbuku = pemesanan.idbuku
+											inner join anggota on pemesanan.email = anggota.email
+										ORDER BY
+											tglpemesanan asc;";
 				$query = $conn->getQuery();
 			?>
 			<div class="article">
-				<div class="opening2"><p id="judul">Borrowing History</p></div>
+				<div class="opening2"><p id="judul">Ordering History</p></div>
 				<div class="main">
 					<table>
-						<tr><th>Book ID</th><th>Book Title</th><th>Member</th><th>Order Date</th>
+						<tr><th>Book Title</th><th>Member</th><th>Order Date</th>
 						<?php
 							if($result = $query->query($queryShowPeminjaman)){
 								while($row = $result->fetch_array()){
 									echo "<tr>";
-									echo "<td>".$row['idbuku']."</td>";
-									echo "<td>".$row['judulbuku']."</td>";
-									echo "<td>".$row['nama']."</td>";
-									echo "<td>".$row['tglpeminjaman']."</td>";
+									echo "<td>" . $row['judulbuku'] . "</td>";
+									echo "<td>" . $row['nama'] . "</td>";
+									echo "<td>" . $row['tglpemesanan'] . "</td>";
 									echo "</tr>";
 								}
 							}
