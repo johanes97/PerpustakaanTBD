@@ -59,19 +59,21 @@
     if(isSet($_REQUEST['iLogin'])){
         $email = $_REQUEST['iEmail'];
 		$pass = $_REQUEST['iPass'];
-		$queryUser = "SELECT * FROM anggota WHERE email='$email'";
-		$queryPass = "SELECT * FROM anggota WHERE email='$email' and sandi='$pass'";
+		$queryUser = "call login('$email','$pass',@existUser,@validPassword)";
+		$queryGetExistUser = "select(@existUser)";
+		$queryGetValidPassword = "select(@validPassword)";
 
 		$resultUser = $conn->executeQuery($queryUser);
-		$resultPass = $conn->executeQuery($queryPass);
+		$resultExistUser = $conn->executeQuery($queryGetExistUser);
+		$resultValidPassword = $conn->executeQuery($queryGetValidPassword);
 
 		if($email == "" || $pass == ""){
 			echo "<script>show()</script>";
 		}
-        else if($resultUser == null){
+        else if($resultExistUser == 0){
             echo "<script>show2()</script>";
         }
-        else if($resultUser != null && $resultPass == null){
+        else if($resultExistUser != 0 && $resultValidPassword == 0){
             echo "<script>show3()</script>";
 		}
 		else{
