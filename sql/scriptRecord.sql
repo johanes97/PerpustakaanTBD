@@ -1,6 +1,6 @@
---Nama basis data: perpustakaantbd
+-- Nama basis data: perpustakaantbd
 
---Buku
+-- Buku
 insert into buku(judulbuku)
 values ('Algoritma dan Struktur Data');
 insert into buku(judulbuku)
@@ -12,7 +12,7 @@ values ('Manage the Economy');
 insert into buku(judulbuku)
 values ('Network Security');
 
---Pengarang
+-- Pengarang
 insert into pengarang(namapengarang)
 values ('Alvinus Sutendy');
 insert into pengarang(namapengarang)
@@ -24,7 +24,7 @@ values ('Firman Sandy Prayitno');
 insert into pengarang(namapengarang)
 values ('Steven Rogerson');
 
---Kata
+-- Kata
 insert into kata(namakata,idf)
 values ('Algoritma',0.43);
 insert into kata(namakata,idf)
@@ -36,11 +36,11 @@ values ('Data',1.45);
 insert into kata(namakata,idf)
 values ('Network',1.4);
 
---Tag
+-- Tag
 insert into tag(namatag)
 values 
 
---BukuPengarang
+-- BukuPengarang
 insert into bukupengarang(idbuku,idpengarang)
 values (1,4);
 insert into bukupengarang(idbuku,idpengarang)
@@ -52,14 +52,14 @@ values (4,5);
 insert into bukupengarang(idbuku,idpengarang)
 values (5,1);
 
---BukuTag
+-- BukuTag
 
---BukuKata
+-- BukuKata
 
---Eksemplar
+-- Eksemplar
 
 
---Anggota
+-- Anggota
 insert into anggota(email,nama,sandi,tipe)
 values ('kasepSumasep@gmail.com','asep','sikasep123','admin');
 insert into anggota(email,nama,sandi,tipe)
@@ -67,16 +67,16 @@ values ('irwanSiKasep@gmail.com','irwan','sayahandssome321','user_biasa');
 insert into anggota(email,nama,sandi,tipe)
 values ('alvinussutendy@gmail.com','alvinus','apaajaboleh','user_biasa');
 
---Denda
+-- Denda
 insert into denda(tipedenda,tarif)
 values (5,5000);
 insert into denda(tipedenda,tarif)
 values (15,10000);
 
---Pemesanan
+-- Pemesanan
 insert into pemesanan(email,idbuku,tglpemesanan)
 values ('irwanSiKasep@gmail.com',1,'2019-12-25');
 insert into pemesanan(email,idbuku,tglpemesanan)
 values ('irwanSiKasep@gmail.com',2,'2018-12-25');
 
---Peminjaman
+-- Peminjaman
