@@ -33,7 +33,7 @@ create table bukukata(
 	bobot float
 );
 create table eksemplar(
-	ideksemplar int not null primary key,
+	ideksemplar int not null auto_increment primary key,
 	idbuku int, foreign key (idbuku) references buku(idbuku),
 	status int not null
 );

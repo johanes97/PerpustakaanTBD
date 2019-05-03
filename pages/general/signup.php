@@ -67,24 +67,22 @@
 		$confirm = $_REQUEST['iCoPass'];
 		$tipe = "user_biasa";
 
-		$queryCekEmail ="call sign_up('$email','$nama','$pass','$tipe')";
+		$querySignUp ="call sign_up('$email','$nama','$pass','$tipe')";
+		$queryCekEmail = "call login('$email','$pass')";
 
-		// if($conn->executeQuery($queryCekEmail) != null){
-		// 	echo "<p class='hint'>Email already used, please use another!</p>";
-		// }
-		// else if($pass != $confirm){
-		// 	echo "<p class='hint'>Password and confirm not equal!</p>";
-		// }
-		// else if($email!="" && $nama!="" && $pass!="" && $confirm!=""){
-		// 	//$query= "INSERT INTO anggota VALUES ('$email', '$nama', '$pass','$tipe')";
-		// 	$conn->executeNonQuery($query);
-		// 	echo '<script type="text/javascript">startModal();</script>';
-		// }
-		// else{
-		// 	echo "<p class='hint'>Please fill it all out!</p>";
-		// }
-
-		$conn->executeNonQuery($queryCekEmail);
+		if($conn->executeQuery($queryCekEmail) != null){
+			echo "<p class='hint'>Email already used, please use another!</p>";
+		}
+		else if($pass != $confirm){
+			echo "<p class='hint'>Password and confirm not equal!</p>";
+		}
+		else if($email!="" && $nama!="" && $pass!="" && $confirm!=""){
+			$conn->executeNonQuery($querySignUp);
+			echo '<script type="text/javascript">startModal();</script>';
+		}
+		else{
+			echo "<p class='hint'>Please fill it all out!</p>";
+		}
 	}
 
 	if(isSet($_REQUEST['iCancel']) ){

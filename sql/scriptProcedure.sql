@@ -24,14 +24,33 @@ BEGIN
     end if;
 END
 
--- Procedure untuk mendapatkan semua judul buku, nama pengarang, dan genre
+-- Procedure untuk menambah pengarang
+
+-- Procedure untuk menambah buku sekaligus kata, tag, dan pengarangnya
+
+-- Procedure untuk menmabah eksemplar
+
+-- Procedure untuk menambah denda
+
+-- Procedure untuk mencari nilai IDF setiap kata
+
+-- Procedure untuk menghitung bobot setiap kata berdasarkan IDF-nya
+
+-- Procedure untuk mencari rekomendasi buku untuk member
+
+-- Procedure untuk mendapatkan semua judul buku, nama pengarang, dan genre (bisa berdasarkan judul dan nama pengaang)
 
 -- Procedure untuk mencari semua member
 
 -- Procedure untuk mencari semua administrator
 
--- Procedure untuk mencari nilai IDF setiap kata
+-- Procedure untuk melakukan peminjaman buku dengan judul buku dan eksemplar tertentu.
 
--- Procedure untuk menghitung bobot setiap kata berdasarkan IDF setiap kata
+-- Procedure untuk melakukan pemesanan buku
 
--- Procedure untuk mencari rekomendasi buku untuk member
+-- Pengingat untuk mengembalikan buku
+
+-- Melakukan perpanjangan masa pinjam buku
+
+-- Menu feedback
+
