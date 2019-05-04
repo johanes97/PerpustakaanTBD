@@ -1,6 +1,6 @@
---Nama basis data: perpustakaantbd
+-- Nama basis data: perpustakaantbd
 
---Bagian Buku
+-- Bagian Buku
 create table buku(
 	idbuku int not null auto_increment primary key,
 	judulbuku varchar(50) not null
@@ -33,12 +33,12 @@ create table bukukata(
 	bobot float
 );
 create table eksemplar(
-	ideksemplar int not null primary key,
+	ideksemplar int not null auto_increment primary key,
 	idbuku int, foreign key (idbuku) references buku(idbuku),
 	status int not null
 );
 
---Bagian Peminjaman
+-- Bagian Peminjaman
 create table anggota(
 	email varchar(50) not null primary key,
 	nama varchar(50) not null,

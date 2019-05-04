@@ -67,12 +67,9 @@
 		$confirm = $_REQUEST['iCoPass'];
 		$tipe = "user_biasa";
 
-		$queryCekEmail ="SELECT 
-								* 
-							FROM 
-								anggota 
-							WHERE 
-								email = '$email'";
+		$querySignUp ="call sign_up('$email','$nama','$pass','$tipe')";
+		$queryCekEmail = "call login('$email','$pass')";
+
 		if($conn->executeQuery($queryCekEmail) != null){
 			echo "<p class='hint'>Email already used, please use another!</p>";
 		}
@@ -80,8 +77,7 @@
 			echo "<p class='hint'>Password and confirm not equal!</p>";
 		}
 		else if($email!="" && $nama!="" && $pass!="" && $confirm!=""){
-			$query= "INSERT INTO anggota VALUES ('$email', '$nama', '$pass','$tipe')";
-			$conn->executeNonQuery($query);
+			$conn->executeNonQuery($querySignUp);
 			echo '<script type="text/javascript">startModal();</script>';
 		}
 		else{

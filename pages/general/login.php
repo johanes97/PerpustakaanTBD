@@ -33,10 +33,10 @@
 	</div>
 	
 	<div id="warning1" class="warning">
-		<p>Please enter your username and password</p>
+		<p>Please enter your email and password</p>
 	</div>
 	<div id="warning2" class="warning">
-		<p>WRONG USERNAME</p>
+		<p>WRONG EMAIL</p>
 	</div>
 	<div id="warning3" class="warning">
 		<p>WRONG PASSWORD</p>
@@ -59,34 +59,36 @@
     if(isSet($_REQUEST['iLogin'])){
         $email = $_REQUEST['iEmail'];
 		$pass = $_REQUEST['iPass'];
-		$queryUser = "SELECT * FROM anggota WHERE email='$email'";
-		$queryPass = "SELECT * FROM anggota WHERE email='$email' and sandi='$pass'";
-
+		$queryUser = "call login('$email','$pass')";
 		$resultUser = $conn->executeQuery($queryUser);
-		$resultPass = $conn->executeQuery($queryPass);
 
 		if($email == "" || $pass == ""){
 			echo "<script>show()</script>";
 		}
-        else if($resultUser == null){
+		else if($resultUser==null ){
             echo "<script>show2()</script>";
-        }
-        else if($resultUser != null && $resultPass == null){
-            echo "<script>show3()</script>";
 		}
-		else{
-			session_start();
-			$_SESSION['email']=$email;
+		else if($resultUser!=null){
+			$emailExist = $resultUser[0]['validEmail'];
+			$passwordTrue = $resultUser[0]['validPassword'];
 
-			$nama = $resultUser[0]['nama'];
-			$tipe = $resultUser[0]['tipe'];
-			$_SESSION['nama']=$nama;
-			$_SESSION['tipe']=$tipe;
-			if($tipe == "user_biasa"){
-				header("Location: ../user/usr.php?email=$email ");
+			if($emailExist== 1 && $passwordTrue == 0){
+	            echo "<script>show3()</script>";
 			}
 			else{
-				header("Location: ../admin/adm.php?email=$email ");
+				session_start();
+				$_SESSION['email']=$email;
+
+				$nama = $resultUser[0]['nama'];
+				$tipe = $resultUser[0]['tipe'];
+				$_SESSION['nama']=$nama;
+				$_SESSION['tipe']=$tipe;
+				if($tipe == "user_biasa"){
+					header("Location: ../user/usr.php?email=$email ");
+				}
+				else{
+					header("Location: ../admin/adm.php?email=$email ");
+				}
 			}
 		}
 	}
