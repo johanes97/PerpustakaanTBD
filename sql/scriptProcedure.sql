@@ -24,23 +24,24 @@ BEGIN
     end if;
 END
 
--- Procedure untuk menambah pengarang
-
 -- Procedure untuk menambah buku sekaligus kata, tag, dan pengarangnya
+-- (Sudah ada sql biasa berdasarkan input buku dan pengarangnya)
 
 -- Procedure untuk menmabah eksemplar
 
 -- Procedure untuk menambah denda
-
+	
 -- Procedure untuk mencari nilai IDF setiap kata
 
 -- Procedure untuk menghitung bobot setiap kata berdasarkan IDF-nya
 
 -- Procedure untuk mencari rekomendasi buku untuk member
 
--- Procedure untuk mendapatkan semua judul buku, nama pengarang, dan genre (bisa berdasarkan judul dan nama pengaang)
+-- Procedure untuk mendapatkan semua judul buku, nama pengarang (bisa berdasarkan judul dan nama pengaang)
+-- (Sudah ada sql biasa berdasarkan input buku dan pengarangnya)
 
 -- Procedure untuk mencari semua member
+-- (Sudah ada sql biasa select semua member untuk user biasa)
 
 -- Procedure untuk mencari semua administrator
 
@@ -48,9 +49,18 @@ END
 
 -- Procedure untuk melakukan pemesanan buku
 
--- Pengingat untuk mengembalikan buku
+-- Procedure untuk mencari semua pengembalian buku
+-- (Sudah dibuat sql biasa select peminjaman)
 
--- Melakukan perpanjangan masa pinjam buku
+-- Procedure untuk mencari semua pemesanan buku
+-- (Sudah dibuat sql biasa select pemesanan)
 
--- Menu feedback
+-- Procedure untuk engingat untuk mengembalikan buku
+
+-- Procedure untuk melakukan perpanjangan masa pinjam buku
+
+-- Procedure untuk mengupdate profil
+-- (Sudah ada sql update profil)
+
+-- Procedure menu feedback
 
