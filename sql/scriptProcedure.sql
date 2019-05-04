@@ -24,10 +24,12 @@ BEGIN
     end if;
 END
 
--- Procedure untuk menambah buku sekaligus kata, tag, dan pengarangnya
--- (Sudah ada sql biasa berdasarkan input buku dan pengarangnya)
+-- ADMIN
 
--- Procedure untuk menmabah eksemplar
+-- Procedure untuk menambah buku sekaligus kata, tag, dan pengarangnya
+-- (Sudah dibuat sql biasa)
+
+-- Procedure untuk menambah eksemplar
 
 -- Procedure untuk menambah denda
 	
@@ -35,32 +37,54 @@ END
 
 -- Procedure untuk menghitung bobot setiap kata berdasarkan IDF-nya
 
+-- Procedure untuk mencari semua member
+-- (Sudah dibuat sql biasa)
+
+-- Procedure untuk mencari semua administrator
+
+-- Procedure untuk melakukan perpanjangan masa pinjam buku
+
+-- Procedure untuk laporan buku-buku yang sering dipinjam
+
+-- Procedure untuk laporan buku-buku yang sering dipinjam berdasarkan pengarang
+
+-- Procedure untuk laporan tag-tag dari buku-buku yang sering dipinjam.
+
+-- Procedure untuk laporan tag-tag yang sering dipinjam oleh seorang anggota.
+
+-- Procedure untuk laporan rekomendasi buku bagi seorang anggota.
+
+
+
+-- GENERAL
+
+-- Procedure untuk laporan history peminjaman buku.
+
+-- Procedure untuk laporan history pemesanan buku.
+
+
+
+
+-- Member
+
 -- Procedure untuk mencari rekomendasi buku untuk member
 
 -- Procedure untuk mendapatkan semua judul buku, nama pengarang (bisa berdasarkan judul dan nama pengaang)
 -- (Sudah ada sql biasa berdasarkan input buku dan pengarangnya)
-
--- Procedure untuk mencari semua member
--- (Sudah ada sql biasa select semua member untuk user biasa)
-
--- Procedure untuk mencari semua administrator
 
 -- Procedure untuk melakukan peminjaman buku dengan judul buku dan eksemplar tertentu.
 
 -- Procedure untuk melakukan pemesanan buku
 
 -- Procedure untuk mencari semua pengembalian buku
--- (Sudah dibuat sql biasa select peminjaman)
+-- (Sudah dibuat sql biasa)
 
 -- Procedure untuk mencari semua pemesanan buku
--- (Sudah dibuat sql biasa select pemesanan)
+-- (Sudah dibuat sql biasa)
 
--- Procedure untuk engingat untuk mengembalikan buku
-
--- Procedure untuk melakukan perpanjangan masa pinjam buku
+-- Procedure untuk mengingatkan pengembalian buku
 
 -- Procedure untuk mengupdate profil
--- (Sudah ada sql update profil)
+-- (Sudah dibuat sql biasa)
 
 -- Procedure menu feedback
-
