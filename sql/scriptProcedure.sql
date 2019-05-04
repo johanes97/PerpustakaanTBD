@@ -62,6 +62,8 @@ END
 
 -- Procedure untuk laporan history pemesanan buku.
 
+-- Procedure untuk mengupdate profil
+-- (Sudah dibuat sql biasa)
 
 
 
@@ -83,8 +85,5 @@ END
 -- (Sudah dibuat sql biasa)
 
 -- Procedure untuk mengingatkan pengembalian buku
-
--- Procedure untuk mengupdate profil
--- (Sudah dibuat sql biasa)
 
 -- Procedure menu feedback
