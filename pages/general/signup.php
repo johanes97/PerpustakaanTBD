@@ -71,7 +71,8 @@
 		$queryCekEmail = "call login('$email','$pass')";
 
 		if($conn->executeQuery($queryCekEmail) != null){
-			echo "<p class='hint'>Email already used, please use another!</p>";
+			echo "<p class='hint'>Email already used,</p>
+			<br><p class='hint'>please use another!</p>";
 		}
 		else if($pass != $confirm){
 			echo "<p class='hint'>Password and confirm not equal!</p>";

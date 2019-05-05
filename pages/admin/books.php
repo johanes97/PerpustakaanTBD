@@ -100,7 +100,17 @@
 				<span id="judulForm">Book Data</span>
 				<form method="get">
 					<div class="iForm"><input type="text" name="judul" placeholder="Title"></div>
-					<div class="iForm"><input type="text" name="pengarang" placeholder="Author"></div>
+					<div class="iForm">
+						<select name="pengarang">
+						  <?php
+							// if($result = $query->query($queryShowBook)){
+							// 	while($row = $result->fetch_array()){
+									echo "<option value='audi' selected>Audi</option>";
+								// }
+							//}
+						?>
+						</select>
+					</div>
 					<div class="tombol">
 						<div><input type="submit" value="ADD" class="iBForm" name="add"></div>
 					</div>
@@ -135,22 +145,17 @@
 			$conn->executeNonQuery($queryInsertBook);
 			$conn->executeNonQuery($queryInsertPengarang);
 			
-			$queryGetIdBuku = "SELECT buku.idbuku
-								FROM buku
-								WHERE judulbuku LIKE '$judulbuku'";
-			$queryGetIdPengarang = "SELECT pengarang.idpengarang
-								FROM pengarang
-								WHERE namapengarang LIKE '$namapengarang'";
+			$queryGetIdBukuIdPengarang = "call search_id_book_and_id_author('$judulbuku','$namapengarang')";
 			
-			$result = $query->query($queryGetIdBuku);
-			$row = $result->fetch_array();
-			$idbuku = $row['idbuku'];
-			
-			$result = $query->query($queryGetIdPengarang);
-			$row = $result->fetch_array();
-			$idpengarang = $row['idpengarang'];
-			
-			$queryInsertBukuPengarang = "INSERT INTO bukupengarang(idbuku,idpengarang) VALUES($idbuku,$idpengarang);";
+			$resultIdBukuIdPengarang = $query->query($queryGetIdBukuIdPengarang);
+			$rowIdBukuIdPengarang = $resultIdBukuIdPengarang->fetch_array();
+			$idbuku = $rowIdBukuIdPengarang['idBuku'];
+
+			$idpengarang = $rowIdBukuIdPengarang['idPengarang'];
+
+			$conn->freeResult();
+
+			$queryInsertBukuPengarang = "call insert_book_author($idbuku,$idpengarang)";
 			$conn->executeNonQuery($queryInsertBukuPengarang);
 
 			//$idKate = $conn->executeQuery("SELECT id_kategori FROM kategori WHERE nama_kategori = '$kategori'")[0][0];

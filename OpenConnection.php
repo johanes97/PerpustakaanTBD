@@ -39,7 +39,9 @@ class MySQLDB{
 		else{
 			return null;
 		}
-	
+		
+		mysqli_free_result();
+		mysqli_next_result($this->db_connection);
 		//$this->db_connection->close();
 	}
 
@@ -48,6 +50,11 @@ class MySQLDB{
 			echo "Query failed<br>";
 		}
 		//$this->db_connection->close();
+	}
+
+	function freeResult(){
+		mysqli_free_result();
+		mysqli_next_result($this->db_connection);
 	}
 }
 
