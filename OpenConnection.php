@@ -42,7 +42,7 @@ class MySQLDB{
 		
 		mysqli_free_result();
 		mysqli_next_result($this->db_connection);
-		//$this->db_connection->close();
+		$this->db_connection->close();
 	}
 
 	function executeNonQuery($query){
