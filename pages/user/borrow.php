@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 
 <?php
-	include ('../../OpenConnection.php'); 
+	include ('../../OpenConnection.php');
+	session_start();
 ?>
 
 <html>
@@ -18,7 +19,6 @@
 <body>
 	<div class="isi">
 		<?php
-			session_start();
 			include ('../../header.php');
 		?>
 		<div class="middle">

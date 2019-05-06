@@ -113,10 +113,10 @@ insert into denda(tipedenda,tarif)
 values (15,10000);
 
 -- Pemesanan
-insert into pemesanan(email,idbuku,tglpemesanan)
-values ('irwanSiKasep@gmail.com',1,'2019-12-25');
-insert into pemesanan(email,idbuku,tglpemesanan)
-values ('irwanSiKasep@gmail.com',2,'2018-12-25');
+insert into pemesanan(email,idbuku,tglpemesanan,statuspemesanan)
+values ('irwanSiKasep@gmail.com',1,'2019-12-25','WAITING');
+insert into pemesanan(email,idbuku,tglpemesanan,statuspemesanan)
+values ('irwanSiKasep@gmail.com',2,'2018-12-25','ACCEPTED');
 
 -- Peminjaman
 insert into peminjaman(email, ideksemplar, tglpeminjaman, tglpengembalian, bataspengembalian, durasihariterlambat, besardenda)

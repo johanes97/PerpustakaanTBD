@@ -3,6 +3,13 @@
 <?php
 	include ('../../OpenConnection.php');
 	session_start();
+	
+	if(isSet($_GET['acceptbutton'])){
+		$idpemesananditerima = $_GET['idpemesananditerima'];
+		
+		$queryterimapemesanan = "CALL terimapemesanan($idpemesananditerima);";
+		$conn->executeNonQuery($queryterimapemesanan);
+	}
 ?>
 
 <html>
@@ -29,18 +36,24 @@
 				<div class="opening2"><p id="judul">Order List</p></div>
 				<div class="main">
 					<table>
-						<tr><th>Book Title</th><th>Member</th><th>Order Date</th>
+						<tr><th>Book Title</th><th>Member</th><th>Order Date</th><th>-</th>
 						<?php										
-							$queryShowPeminjaman = "CALL semuapemesanan();";
+							$queryShowPeminjaman = "CALL semuapemesananwaiting();";
 							$query = $conn->getQuery();
 							
 							if($result = $query->query($queryShowPeminjaman)){
 								while($row = $result->fetch_array()){
+									echo "<form action='' method='get'>";
+									
 									echo "<tr>";
 									echo "<td>" . $row['judulbuku'] . "</td>";
 									echo "<td>" . $row['nama'] . "</td>";
 									echo "<td>" . $row['tglpemesanan'] . "</td>";
+									echo "<input name='idpemesananditerima' type='hidden' value='" . $row['idpemesanan'] . "'>";
+									echo "<td><input name='acceptbutton' type='submit' value='ACCEPT' class='iBForm'></td>";
 									echo "</tr>";
+									
+									echo "</form>";
 								}
 							}
 						?>

@@ -56,7 +56,11 @@ END
 
 
 
+
+
+
 --GENERAL
+
 --BUKU: Mendapatkan daftar seluruh buku beserta pengarang, tag, kata, dan jumlah eksemplar (SUDAH DI SOURCE CODE)(BELUM SELESAI)
 CREATE DEFINER=`root`@`localhost` PROCEDURE `semuabuku`()
 BEGIN
@@ -118,7 +122,22 @@ BEGIN
 		inner join pemesanan on buku.idbuku = pemesanan.idbuku
 		inner join anggota on pemesanan.email = anggota.email
 	order by
-		tglpemesanan asc;
+		statuspemesanan desc, tglpemesanan asc;
+END
+
+--PEMESANAN: mendapatkan daftar seluruh pemesanan yang masih berstatus WAITING (SUDAH DI SOURCE CODE)
+CREATE DEFINER=`root`@`localhost` PROCEDURE `semuapemesananwaiting`()
+BEGIN
+	select
+		*
+	from
+		buku
+		inner join pemesanan on buku.idbuku = pemesanan.idbuku
+		inner join anggota on pemesanan.email = anggota.email
+	where
+		statuspemesanan like 'WAITING'
+	order by
+		statuspemesanan desc, tglpemesanan asc;
 END
 
 --PEMESANAN: mendapatkan daftar pemesanan anggota yang login (SUDAH DI SOURCE CODE)
@@ -135,17 +154,30 @@ BEGIN
 	where
 		anggota.email like emaillogin
 	order by
-		tglpemesanan asc;
+		statuspemesanan desc, tglpemesanan asc;
 END
 
---PEMESANAN: menambahkan pemesanan sesuai anggota yang login
+--PEMESANAN: menambahkan pemesanan sesuai anggota yang login (SUDAH DI SOURCE CODE)
 CREATE DEFINER=`root`@`localhost` PROCEDURE `tambahpemesanan`(
 	IN emailpemesan varchar(100),
-	IN idbukudipesan varchar(100)
+	IN idbukudipesan int
 )
 BEGIN
-	insert into pemesanan(email,idbuku,tglpemesanan)
-	values (emailpemesan,idbukudipesan,now());
+	insert into pemesanan(email,idbuku,tglpemesanan,statuspemesanan)
+	values (emailpemesan,idbukudipesan,now(),'WAITING');
+END
+
+--PEMESANAN: menerima pemesanan anggota (SUDAH DI SOURCE CODE)
+CREATE DEFINER=`root`@`localhost` PROCEDURE `terimapemesanan`(
+	IN idpemesananditerima int
+)
+BEGIN
+	update
+		pemesanan 
+	set
+		statuspemesanan = 'ACCEPTED'
+	where
+		idpemesanan = idpemesananditerima;
 END
 
 -- Procedure untuk laporan history peminjaman buku.
@@ -154,6 +186,10 @@ END
 
 -- Procedure untuk mengupdate profil
 -- (Sudah dibuat sql biasa)
+
+
+
+
 
 
 

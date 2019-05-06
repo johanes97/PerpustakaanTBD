@@ -30,7 +30,7 @@
 				</div>
 				<div class="main">
 					<table>
-						<tr><th>Book Title</th><th>Order Date</th>
+						<tr><th>Book Title</th><th>Order Date</th><th>Status</th>
 						<?php
 							$email = $_SESSION['email'];
 							$queryShowPeminjaman = "CALL caripemesanan('$email');";
@@ -41,6 +41,7 @@
 									echo "<tr>";
 									echo "<td>" . $row['judulbuku'] . "</td>";
 									echo "<td>" . $row['tglpemesanan'] . "</td>";
+									echo "<td>" . $row['statuspemesanan'] . "</td>";
 									echo "</tr>";
 								}
 							}
