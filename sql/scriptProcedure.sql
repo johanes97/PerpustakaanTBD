@@ -1,5 +1,5 @@
 -- Procedure untuk sign up
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sign_up`(
+CREATE DEFINER=`root`@`localhost` PROCEDURE `signup`(
 	IN emailInput varchar(100),
     IN nameInput varchar(100),
     IN passwordInput varchar(100),
@@ -57,7 +57,7 @@ END
 
 
 --GENERAL
---BUKU: Mendapatkan daftar seluruh buku beserta pengarang, tag, kata, dan jumlah eksemplar (BELUM SELESAI)
+--BUKU: Mendapatkan daftar seluruh buku beserta pengarang, tag, kata, dan jumlah eksemplar (SUDAH DI SOURCE CODE)(BELUM SELESAI)
 CREATE DEFINER=`root`@`localhost` PROCEDURE `semuabuku`()
 BEGIN
 	select distinct
@@ -68,40 +68,47 @@ BEGIN
 		inner join pengarang on pengarang.idpengarang = bukupengarang.idpengarang;
 END
 
---BUKU: Mencari buku berdasarkan judul, pengarang, atau tag (BELUM SELESAI)(BELUM TERHUBUNG DENGAN TAG)
+--BUKU: Mencari buku berdasarkan judul, pengarang, atau tag (BELUM SELESAI)(BAGIAN TAG MASIH SALAH)
 CREATE DEFINER=`root`@`localhost` PROCEDURE `caribuku`(
 	IN pilihanpencarian varchar(100),
     IN keyword varchar(100)
 )
 BEGIN
-	if pilihanpencarian like 'judul' then
+	set keyword = concat('%',keyword,'%');
+	
+	if (pilihanpencarian = 'judul') then
 		
 		select distinct
 			*
 		from
 			buku
 			inner join bukupengarang on buku.idbuku = bukupengarang.idbuku
-			inner join pengarang on pengarang.idpengarang = bukupengarang.idpengarang;
+			inner join pengarang on pengarang.idpengarang = bukupengarang.idpengarang
 		where
-			buku.judulbuku like '%keyword%';
+			buku.judulbuku like keyword;
 	
-	elseif pilihanpencarian like 'pengarang' then
+	elseif (pilihanpencarian = 'pengarang') then
 	
 		select distinct
 			*
 		from
 			buku
 			inner join bukupengarang on buku.idbuku = bukupengarang.idbuku
-			inner join pengarang on pengarang.idpengarang = bukupengarang.idpengarang;
+			inner join pengarang on pengarang.idpengarang = bukupengarang.idpengarang
 		where
-			pengarang.namapengarang like '%keyword%';
+			pengarang.namapengarang like keyword;
 	
-	elseif pilihanpencarian like 'tag' then ;
+	elseif (pilihanpencarian = 'tag') then
+		
+		select distinct
+			*
+		from
+			buku;
 	
 	end if;
 END
 
---PEMESANAN: mendapatkan daftar seluruh pemesanan
+--PEMESANAN: mendapatkan daftar seluruh pemesanan (SUDAH DI SOURCE CODE)
 CREATE DEFINER=`root`@`localhost` PROCEDURE `semuapemesanan`()
 BEGIN
 	select
@@ -109,10 +116,12 @@ BEGIN
 	from
 		buku
 		inner join pemesanan on buku.idbuku = pemesanan.idbuku
-		inner join anggota on pemesanan.email = anggota.email;
+		inner join anggota on pemesanan.email = anggota.email
+	order by
+		tglpemesanan asc;
 END
 
---PEMESANAN: mendapatkan daftar pemesanan anggota yang login
+--PEMESANAN: mendapatkan daftar pemesanan anggota yang login (SUDAH DI SOURCE CODE)
 CREATE DEFINER=`root`@`localhost` PROCEDURE `caripemesanan`(
 	IN emaillogin varchar(100)
 )

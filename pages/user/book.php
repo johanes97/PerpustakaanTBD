@@ -2,34 +2,7 @@
 
 <?php
 	include('../../OpenConnection.php');
-?>
-
-<?php
-	$queryShowBook="SELECT DISTINCT
-						*
-					FROM 
-						buku
-						inner join bukupengarang on buku.idbuku = bukupengarang.idbuku
-						inner join pengarang on pengarang.idpengarang = bukupengarang.idpengarang";
-	$query = $conn->getQuery();
-
-	if(isset($_GET['iSearch'])){
-		$textInput = $_GET['textInput'];
-		$pilihan = $_GET['pilihan'];
-
-		$queryCari="";
-		if($pilihan == 'judul'){
-			$queryCari = " WHERE judulbuku LIKE '%$textInput%'";
-		}
-		else if($pilihan == 'pengarang'){
-			$queryCari = " WHERE namapengarang LIKE '%$textInput%'";	
-		}
-		else if($pilihan == 'tag'){
-			$queryCari = " WHERE namatag LIKE '%$textInput%'";
-		}
-		if($textInput == "") $queryCari="";
-		$queryShowBook .= $queryCari;
-	}
+	session_start();
 ?>
 
 <html>
@@ -46,7 +19,6 @@
 <body>
 	<div class="isi">
 		<?php
-			session_start();
 			include ('../../header.php');
 		?>
 		<div class="middle">
@@ -70,6 +42,17 @@
 					<table>
 						<tr><th>Book ID</th><th>Book Title</th><th>Author</th></tr>
 						<?php
+							$queryShowBook="CALL semuabuku()";
+							$query = $conn->getQuery();
+
+							if(isset($_GET['iSearch'])){
+								$textInput = $_GET['textInput'];
+								$pilihan = $_GET['pilihan'];
+
+								if($textInput == "") $queryCari="";
+								$queryShowBook = "CALL caribuku('$pilihan','$textInput');";
+							}
+						
 							if($result = $query->query($queryShowBook)){
 								while($row = $result->fetch_array()){
 									echo "<tr>";

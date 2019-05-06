@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 
 <?php
-	include ('../../OpenConnection.php'); 
+	include ('../../OpenConnection.php');
+	session_start();
 ?>
 
 <html>
@@ -18,29 +19,21 @@
 <body>
 	<div class="isi">
 		<?php
-			session_start();
 			include ('../../headerAdmin.php');
 		?>
 		<div class="middle">
 			<?php
 				include ('../../sideAdmin.php');
-
-				$queryShowPeminjaman = "SELECT
-											*
-										FROM 
-											buku
-											inner join pemesanan on buku.idbuku = pemesanan.idbuku
-											inner join anggota on pemesanan.email = anggota.email
-										ORDER BY
-											tglpemesanan asc;";
-				$query = $conn->getQuery();
 			?>
 			<div class="article">
 				<div class="opening2"><p id="judul">Order List</p></div>
 				<div class="main">
 					<table>
 						<tr><th>Book Title</th><th>Member</th><th>Order Date</th>
-						<?php
+						<?php										
+							$queryShowPeminjaman = "CALL semuapemesanan();";
+							$query = $conn->getQuery();
+							
 							if($result = $query->query($queryShowPeminjaman)){
 								while($row = $result->fetch_array()){
 									echo "<tr>";

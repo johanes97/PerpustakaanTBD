@@ -67,7 +67,7 @@
 		$confirm = $_REQUEST['iCoPass'];
 		$tipe = "user_biasa";
 
-		$querySignUp ="call sign_up('$email','$nama','$pass','$tipe')";
+		$querySignUp ="call signup('$email','$nama','$pass','$tipe')";
 		$queryCekEmail = "call login('$email','$pass')";
 
 		if($conn->executeQuery($queryCekEmail) != null){

@@ -2,6 +2,7 @@
 
 <?php  
 	include ('../../OpenConnection.php');
+	session_start();
 ?>
 
 <html>
@@ -59,7 +60,7 @@
     if(isSet($_REQUEST['iLogin'])){
         $email = $_REQUEST['iEmail'];
 		$pass = $_REQUEST['iPass'];
-		$queryUser = "call login('$email','$pass')";
+		$queryUser = "CALL login('$email','$pass')";
 		$resultUser = $conn->executeQuery($queryUser);
 
 		if($email == "" || $pass == ""){
@@ -76,7 +77,6 @@
 	            echo "<script>show3()</script>";
 			}
 			else{
-				session_start();
 				$_SESSION['email']=$email;
 
 				$nama = $resultUser[0]['nama'];

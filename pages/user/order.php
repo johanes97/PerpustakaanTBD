@@ -2,21 +2,7 @@
 
 <?php
 	include ('../../OpenConnection.php'); 
-?>
-
-<?php
-	$email = $_SESSION['email'];
-	$queryShowPeminjaman = "SELECT
-								*
-							FROM 
-								buku
-								inner join pemesanan on buku.idbuku = pemesanan.idbuku
-								inner join anggota on pemesanan.email = anggota.email
-							WHERE
-								anggota.email LIKE '$email'
-							ORDER BY
-								tglpemesanan asc;";
-	$query = $conn->getQuery();
+	session_start();
 ?>
 
 <html>
@@ -33,7 +19,6 @@
 <body>
 	<div class="isi">
 		<?php
-			session_start();
 			include ('../../header.php');
 		?>
 		<div class="middle">
@@ -50,6 +35,10 @@
 					<table>
 						<tr><th>Book Title</th><th>Order Date</th>
 						<?php
+							$email = $_SESSION['email'];
+							$queryShowPeminjaman = "CALL caripemesanan('$email');";
+							$query = $conn->getQuery();
+							
 							if($result = $query->query($queryShowPeminjaman)){
 								while($row = $result->fetch_array()){
 									echo "<tr>";
