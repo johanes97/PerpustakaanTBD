@@ -60,8 +60,8 @@
 						<span class="cari" id="by"><pre> by </pre></span>
 						<select name="pilihan" class="cari">
 							<option value="judul">Title</option>
-							<option value="tag">Tag</option>
 							<option value="pengarang">Author</option>
+							<option value="tag">Tag</option>
 						</select>
 						<input id="button" name="iSearch" type="submit" value="SEARCH" class="cari">
 					</form>

@@ -56,7 +56,78 @@ END
 
 
 
--- GENERAL
+--GENERAL
+--BUKU: Mendapatkan daftar seluruh buku beserta pengarang, tag, kata, dan jumlah eksemplar (BELUM SELESAI)
+CREATE DEFINER=`root`@`localhost` PROCEDURE `semuabuku`()
+BEGIN
+	select distinct
+		*
+	from
+		buku
+		inner join bukupengarang on buku.idbuku = bukupengarang.idbuku
+		inner join pengarang on pengarang.idpengarang = bukupengarang.idpengarang;
+END
+
+--BUKU: Mencari buku berdasarkan judul, pengarang, atau tag (BELUM SELESAI)(BELUM TERHUBUNG DENGAN TAG)
+CREATE DEFINER=`root`@`localhost` PROCEDURE `caribuku`(
+	IN pilihanpencarian varchar(100),
+    IN keyword varchar(100)
+)
+BEGIN
+	if pilihanpencarian like 'judul' then
+		
+		select distinct
+			*
+		from
+			buku
+			inner join bukupengarang on buku.idbuku = bukupengarang.idbuku
+			inner join pengarang on pengarang.idpengarang = bukupengarang.idpengarang;
+		where
+			buku.judulbuku like '%keyword%';
+	
+	elseif pilihanpencarian like 'pengarang' then
+	
+		select distinct
+			*
+		from
+			buku
+			inner join bukupengarang on buku.idbuku = bukupengarang.idbuku
+			inner join pengarang on pengarang.idpengarang = bukupengarang.idpengarang;
+		where
+			pengarang.namapengarang like '%keyword%';
+	
+	elseif pilihanpencarian like 'tag' then ;
+	
+	end if;
+END
+
+--PEMESANAN: mendapatkan daftar seluruh pemesanan
+CREATE DEFINER=`root`@`localhost` PROCEDURE `semuapemesanan`()
+BEGIN
+	select
+		*
+	from
+		buku
+		inner join pemesanan on buku.idbuku = pemesanan.idbuku
+		inner join anggota on pemesanan.email = anggota.email;
+END
+
+--PEMESANAN: mendapatkan daftar pemesanan anggota yang login
+CREATE DEFINER=`root`@`localhost` PROCEDURE `caripemesanan`(
+	IN emaillogin varchar(100)
+)
+BEGIN
+	select
+		*
+	from
+		buku
+		inner join pemesanan on buku.idbuku = pemesanan.idbuku
+		inner join anggota on pemesanan.email = anggota.email
+	where
+		anggota.email like emaillogin
+	order by
+		tglpemesanan asc;
+END
 
 -- Procedure untuk laporan history peminjaman buku.
 
@@ -67,12 +138,9 @@ END
 
 
 
--- Member
+-- MEMBER
 
--- Procedure untuk mencari rekomendasi buku untuk member
-
--- Procedure untuk mendapatkan semua judul buku, nama pengarang (bisa berdasarkan judul dan nama pengaang)
--- (Sudah ada sql biasa berdasarkan input buku dan pengarangnya)
+--Procedure untuk mencari rekomendasi buku untuk member
 
 -- Procedure untuk melakukan peminjaman buku dengan judul buku dan eksemplar tertentu.
 

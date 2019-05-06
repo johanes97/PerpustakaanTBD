@@ -6,9 +6,9 @@
         <hr>
         <li><a href="../admin/books.php" class="side">Book List</a></li>
         <hr>
-        <li><a href="../admin/member.php" class="side">Member List</a></li>
+        <li><a href="../admin/memberlist.php" class="side">Member List</a></li>
         <hr>
-        <li><a href="../admin/admList.php" class="side">Administrator List</a></li>
+        <li><a href="../admin/adminlist.php" class="side">Administrator List</a></li>
         <hr>
 		<li><a href="../admin/orders.php" class="side">Order List</a></li>
         <hr>
