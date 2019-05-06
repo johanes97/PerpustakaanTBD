@@ -3,6 +3,15 @@
 <?php
 	include('../../OpenConnection.php');
 	session_start();
+
+	if(isSet($_GET['orderbutton'])){
+		$emailpemesan = $_SESSION['email'];
+		$idbukudipesan = $_GET['idbukudipesan'];
+		
+		$queryaddorder = "CALL tambahpemesanan('$emailpemesan',$idbukudipesan);";
+		$conn->executeNonQuery($queryaddorder);
+		echo "<script>modalOn();</script>";
+	}
 ?>
 
 <html>
@@ -27,7 +36,7 @@
 			?>
 			<div class="article">
 				<div class="opening2"><p id="judul">Book List</p>
-					<form class="pilihanCari" action="">
+					<form class="pilihanCari" action="" method="get">
 						<input type="text" name="textInput" placeholder="Search books..." class="cari">
 						<span class="cari" id="by"><pre> by </pre></span>
 						<select name="pilihan" class="cari">
@@ -40,7 +49,7 @@
 				</div>
 				<div class="main">
 					<table>
-						<tr><th>Book ID</th><th>Book Title</th><th>Author</th></tr>
+						<tr><th>Book ID</th><th>Book Title</th><th>Author</th><th></th>
 						<?php
 							$queryShowBook="CALL semuabuku()";
 							$query = $conn->getQuery();
@@ -52,14 +61,20 @@
 								if($textInput == "") $queryCari="";
 								$queryShowBook = "CALL caribuku('$pilihan','$textInput');";
 							}
-						
+							
 							if($result = $query->query($queryShowBook)){
 								while($row = $result->fetch_array()){
+									echo "<form action='' method='get'>";
+									
 									echo "<tr>";
 									echo "<td>" . $row['idbuku'] . "</td>";
 									echo "<td>" . $row['judulbuku'] . "</td>";
 									echo "<td>" . $row['namapengarang'] . "</td>";
+									echo "<input name='idbukudipesan' type='hidden' value='" . $row['idbuku'] . "'>";
+									echo "<td><input name='orderbutton' type='submit' value='ORDER' class='iBForm'></td>";
 									echo "</tr>";
+									
+									echo "</form>";
 								}
 							}
 						?>
@@ -71,6 +86,7 @@
 			</div>
 		</div>
 	</div>
+
 </body>
 
 </html>

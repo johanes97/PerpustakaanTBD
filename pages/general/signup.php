@@ -2,6 +2,7 @@
 
 <?php
 	include ('../../OpenConnection.php'); 
+	session_start();
 ?>
 
 <html>
@@ -67,8 +68,8 @@
 		$confirm = $_REQUEST['iCoPass'];
 		$tipe = "user_biasa";
 
-		$querySignUp ="call signup('$email','$nama','$pass','$tipe')";
-		$queryCekEmail = "call login('$email','$pass')";
+		$querySignUp ="CALL signup('$email','$nama','$pass','$tipe')";
+		$queryCekEmail = "CALL login('$email','$pass')";
 
 		if($conn->executeQuery($queryCekEmail) != null){
 			echo "<p class='hint'>Email already used,</p>

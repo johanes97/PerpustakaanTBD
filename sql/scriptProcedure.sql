@@ -138,6 +138,16 @@ BEGIN
 		tglpemesanan asc;
 END
 
+--PEMESANAN: menambahkan pemesanan sesuai anggota yang login
+CREATE DEFINER=`root`@`localhost` PROCEDURE `tambahpemesanan`(
+	IN emailpemesan varchar(100),
+	IN idbukudipesan varchar(100)
+)
+BEGIN
+	insert into pemesanan(email,idbuku,tglpemesanan)
+	values (emailpemesan,idbukudipesan,now());
+END
+
 -- Procedure untuk laporan history peminjaman buku.
 
 -- Procedure untuk laporan history pemesanan buku.
