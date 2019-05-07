@@ -3,6 +3,15 @@
 <?php
 	include('../../OpenConnection.php'); 
 	session_start();
+	
+	if(isSet($_GET['deletebutton'])){
+		$idbukudihapus = $_GET['idbukudihapus'];
+		
+		$queryhapusbuku = "CALL hapusbuku($idbukudihapus);";
+		$conn->executeNonQuery($queryhapusbuku);
+		
+		echo "<script>modalOn();</script>";
+	}
 ?>
 
 <html>
@@ -41,7 +50,7 @@
 				<div class="main">
 					<p id="tambahBuku"></p>
 					<table>
-						<tr><th>Book ID</th><th>Book Title</th><th>Author</th></tr>
+						<tr><th>Book ID</th><th>Book Title</th><th>Author</th><th>Tag</th><th>Eksemplar Tersedia</th><th>-</th></tr>
 						<?php
 							$queryShowBook="CALL semuabuku()";
 							$query = $conn->getQuery();
@@ -50,27 +59,25 @@
 								$textInput = $_GET['textInput'];
 								$pilihan = $_GET['pilihan'];
 
-								$queryCari="";
-								if($pilihan == 'judul'){
-									$queryCari = " WHERE judulbuku LIKE '%$textInput%'";
-								}
-								else if($pilihan == 'pengarang'){
-									$queryCari = " WHERE namapengarang LIKE '%$textInput%'";	
-								}
-								else if($pilihan == 'tag'){
-									$queryCari = " WHERE namatag LIKE '%$textInput%'";
-								}
 								if($textInput == "") $queryCari="";
-								$queryShowBook .= $queryCari;
+								$queryShowBook = "CALL caribuku('$pilihan','$textInput');";
 							}
 								
 							if($result = $query->query($queryShowBook)){
 								while($row = $result->fetch_array()){
+									echo "<form action='' method='get'>";
+									
 									echo "<tr>";
 									echo "<td>" . $row['idbuku'] . "</td>";
 									echo "<td>" . $row['judulbuku'] . "</td>";
 									echo "<td>" . $row['namapengarang'] . "</td>";
+									echo "<td>" . "</td>";
+									echo "<td>" . "</td>";
+									echo "<input name='idbukudihapus' type='hidden' value='" . $row['idbuku'] . "'>";
+									echo "<td><input name='deletebutton' type='submit' value='DELETE' class='iBForm'></td>";
 									echo "</tr>";
+									
+									echo "</form>";
 								}
 							}
 						?>

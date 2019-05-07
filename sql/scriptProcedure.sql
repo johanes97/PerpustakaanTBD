@@ -1,4 +1,4 @@
--- Procedure untuk sign up
+--Procedure untuk sign up (signup.php)
 CREATE DEFINER=`root`@`localhost` PROCEDURE `signup`(
 	IN emailInput varchar(100),
     IN nameInput varchar(100),
@@ -11,7 +11,7 @@ BEGIN
     end if;
 END
 
--- Procedure untuk login
+-- Procedure untuk login (login.php)
 CREATE DEFINER=`root`@`localhost` PROCEDURE `login`(
 	IN emailInput varchar(100),
     IN sandiInput varchar(100)
@@ -37,10 +37,27 @@ END
 
 -- Procedure untuk menghitung bobot setiap kata berdasarkan IDF-nya
 
--- Procedure untuk mencari semua member
--- (Sudah dibuat sql biasa)
+--Procedure untuk mencari semua member (memberlist.php)
+CREATE DEFINER=`root`@`localhost` PROCEDURE `semuaanggotabiasa`()
+BEGIN
+	select
+		*
+	from
+		anggota
+	where
+		anggota.tipe like 'user_biasa';
+END
 
--- Procedure untuk mencari semua administrator
+-- Procedure untuk mencari semua administrator (adminlist.php)
+CREATE DEFINER=`root`@`localhost` PROCEDURE `semuadmin`()
+BEGIN
+	select
+		*
+	from
+		anggota
+	where
+		anggota.tipe like 'admin';
+END
 
 -- Procedure untuk melakukan perpanjangan masa pinjam buku
 
@@ -61,7 +78,7 @@ END
 
 --GENERAL
 
---BUKU: Mendapatkan daftar seluruh buku beserta pengarang, tag, kata, dan jumlah eksemplar (SUDAH DI SOURCE CODE)(BELUM SELESAI)
+--BUKU: Mendapatkan daftar seluruh buku beserta pengarang, tag, kata, dan jumlah eksemplar (book.php books.php)(BELUM SELESAI)(BAGIAN TAG MASIH SALAH)
 CREATE DEFINER=`root`@`localhost` PROCEDURE `semuabuku`()
 BEGIN
 	select distinct
@@ -69,10 +86,12 @@ BEGIN
 	from
 		buku
 		inner join bukupengarang on buku.idbuku = bukupengarang.idbuku
-		inner join pengarang on pengarang.idpengarang = bukupengarang.idpengarang;
+		inner join pengarang on pengarang.idpengarang = bukupengarang.idpengarang
+	where
+		buku.deleted = 0;
 END
 
---BUKU: Mencari buku berdasarkan judul, pengarang, atau tag (BELUM SELESAI)(BAGIAN TAG MASIH SALAH)
+--BUKU: Mencari buku berdasarkan judul, pengarang, atau tag (book.php books.php)(BELUM SELESAI)(BAGIAN TAG MASIH SALAH, BELUM MENGGUNAKAN IDF/BOBOT)
 CREATE DEFINER=`root`@`localhost` PROCEDURE `caribuku`(
 	IN pilihanpencarian varchar(100),
     IN keyword varchar(100)
@@ -89,6 +108,7 @@ BEGIN
 			inner join bukupengarang on buku.idbuku = bukupengarang.idbuku
 			inner join pengarang on pengarang.idpengarang = bukupengarang.idpengarang
 		where
+			buku.deleted = 0,
 			buku.judulbuku like keyword;
 	
 	elseif (pilihanpencarian = 'pengarang') then
@@ -100,6 +120,7 @@ BEGIN
 			inner join bukupengarang on buku.idbuku = bukupengarang.idbuku
 			inner join pengarang on pengarang.idpengarang = bukupengarang.idpengarang
 		where
+			buku.deleted = 0,
 			pengarang.namapengarang like keyword;
 	
 	elseif (pilihanpencarian = 'tag') then
@@ -112,7 +133,30 @@ BEGIN
 	end if;
 END
 
---PEMESANAN: mendapatkan daftar seluruh pemesanan (SUDAH DI SOURCE CODE)
+--BUKU: menghapus buku (Books.php)
+CREATE DEFINER=`root`@`localhost` PROCEDURE `hapusbuku`(
+	IN idbukudihapus int
+)
+BEGIN
+	delete from bukupengarang
+	where idbuku = idbukudihapus;
+	
+	delete from bukutag
+	where idbuku = idbukudihapus;
+		
+	delete from bukukata
+	where idbuku = idbukudihapus;
+		
+	update eksemplar
+	set deleted = 1
+	where idbuku = idbukudihapus;
+	
+	update buku
+	set deleted = 1
+	where idbuku = idbukudihapus;
+END
+
+--PEMESANAN: mendapatkan daftar seluruh pemesanan, dapat berfungsi sebagai laporan (order.php orders.php)
 CREATE DEFINER=`root`@`localhost` PROCEDURE `semuapemesanan`()
 BEGIN
 	select
@@ -125,7 +169,7 @@ BEGIN
 		statuspemesanan desc, tglpemesanan asc;
 END
 
---PEMESANAN: mendapatkan daftar seluruh pemesanan yang masih berstatus WAITING (SUDAH DI SOURCE CODE)
+--PEMESANAN: mendapatkan daftar seluruh pemesanan yang masih berstatus WAITING (orders.php)
 CREATE DEFINER=`root`@`localhost` PROCEDURE `semuapemesananwaiting`()
 BEGIN
 	select
@@ -140,7 +184,7 @@ BEGIN
 		statuspemesanan desc, tglpemesanan asc;
 END
 
---PEMESANAN: mendapatkan daftar pemesanan anggota yang login (SUDAH DI SOURCE CODE)
+--PEMESANAN: mendapatkan daftar pemesanan anggota yang login (order.php)
 CREATE DEFINER=`root`@`localhost` PROCEDURE `caripemesanan`(
 	IN emaillogin varchar(100)
 )
@@ -157,7 +201,7 @@ BEGIN
 		statuspemesanan desc, tglpemesanan asc;
 END
 
---PEMESANAN: menambahkan pemesanan sesuai anggota yang login (SUDAH DI SOURCE CODE)
+--PEMESANAN: menambahkan pemesanan sesuai anggota yang login (book.php)
 CREATE DEFINER=`root`@`localhost` PROCEDURE `tambahpemesanan`(
 	IN emailpemesan varchar(100),
 	IN idbukudipesan int
@@ -167,7 +211,7 @@ BEGIN
 	values (emailpemesan,idbukudipesan,now(),'WAITING');
 END
 
---PEMESANAN: menerima pemesanan anggota (SUDAH DI SOURCE CODE)
+--PEMESANAN: menerima pemesanan anggota (orders.php)
 CREATE DEFINER=`root`@`localhost` PROCEDURE `terimapemesanan`(
 	IN idpemesananditerima int
 )
@@ -180,12 +224,44 @@ BEGIN
 		idpemesanan = idpemesananditerima;
 END
 
--- Procedure untuk laporan history peminjaman buku.
+--PEMINJAMAN: mendapatkan daftar seluruh peminjaman, dapat berfungsi sebagai laporan (borrow.php borrows.php)(BELUM SELESAI)
+CREATE DEFINER=`root`@`localhost` PROCEDURE `semuapemesanan`()
+BEGIN
+	select
+		*
+	from
+		eksemplar
+		inner join peminjaman on eksemplar.idbuku = peminjaman.idbuku
+		inner join anggota on peminjaman.email = anggota.email
+	order by
+		bataspengembalian asc;
+END
 
--- Procedure untuk laporan history pemesanan buku.
-
--- Procedure untuk mengupdate profil
--- (Sudah dibuat sql biasa)
+--Procedure untuk mengupdate profil (profil.php)
+CREATE DEFINER=`root`@`localhost` PROCEDURE `updateprofil`(
+	IN emaillogin varchar(100),
+	IN namabaru varchar(100),
+	IN sandibaru varchar(100)
+)
+BEGIN		
+	if (namabaru != '') then
+		update
+			anggota
+		set
+			nama = namabaru
+		where
+			email like emaillogin;
+	end if;
+	
+	if (sandibaru != '') then
+		update
+			anggota
+		set
+			sandi = sandibaru
+		where
+			email like emaillogin;
+	end if;
+END
 
 
 

@@ -10,6 +10,7 @@
 		
 		$queryaddorder = "CALL tambahpemesanan('$emailpemesan',$idbukudipesan);";
 		$conn->executeNonQuery($queryaddorder);
+		
 		echo "<script>modalOn();</script>";
 	}
 ?>
@@ -49,7 +50,7 @@
 				</div>
 				<div class="main">
 					<table>
-						<tr><th>Book ID</th><th>Book Title</th><th>Author</th><th></th>
+						<tr><th>Book ID</th><th>Book Title</th><th>Author</th><th>Tag</th><th>-</th></tr>
 						<?php
 							$queryShowBook="CALL semuabuku()";
 							$query = $conn->getQuery();
@@ -70,6 +71,7 @@
 									echo "<td>" . $row['idbuku'] . "</td>";
 									echo "<td>" . $row['judulbuku'] . "</td>";
 									echo "<td>" . $row['namapengarang'] . "</td>";
+									echo "<td>" . "</td>";
 									echo "<input name='idbukudipesan' type='hidden' value='" . $row['idbuku'] . "'>";
 									echo "<td><input name='orderbutton' type='submit' value='ORDER' class='iBForm'></td>";
 									echo "</tr>";

@@ -2,6 +2,7 @@
 
 <?php  
 	include ('../../OpenConnection.php');
+	session_start();
 ?>
 
 <html>
@@ -18,7 +19,6 @@
 <body>
 	<div class="isi">
 		<?php
-			session_start();
 			if($_SESSION['tipe'] !='user_biasa'){
 				include ('../../headerAdmin.php');
 			}
@@ -61,6 +61,7 @@
 				<div class="iForm"><input type="text" name="iName" placeholder="Name"></div>
 				<div class="iForm"><input type="password" name="iPass" placeholder="Password"></div>
 				<div class="iForm"><input type="password" name="iCoPass" placeholder="Confirm Password"></div>
+				<p>Kosongkan yang tidak ingin diubah</p>
 				<div class="tombol">
 					<div><input type="submit" value="UPDATE" class="iBForm" name="iUpdate"></div>
 				</div>
@@ -85,42 +86,27 @@
 
 <?php
 	if(isSet($_REQUEST['iUpdate']) ){
-		$nama = $_REQUEST['iName'];
-		$email = $_SESSION['email'];
-		$pass = $_REQUEST['iPass'];
-		$confirm = $_REQUEST['iCoPass']; 
-		$tipe = "user_biasa";		
+		$emaillogin = $_SESSION['email'];
+		$namabaru = $_REQUEST['iName'];
+		$sandibaru = $_REQUEST['iPass'];
+		$confirmsandi = $_REQUEST['iCoPass'];
 		
-		if($pass != $confirm){
+		$berubah = false;
+		
+		if($sandibaru != $confirmsandi){
 			echo "<script>show()</script>";
 		}
 		else{
-			$ganti = false;
-			if($pass != ""){
-				$queryUpdate = "UPDATE anggota SET password = '$pass' WHERE email = '$email'";
-				$conn->executeNonQuery($queryUpdate);
-				$ganti=true;
+			$queryupdateprofil = "CALL updateprofil('$emaillogin','$namabaru','$sandibaru');";
+			$conn->executeNonQuery($queryupdateprofil);
+			$berubah=true;
+			
+			if($namabaru != ""){
+				$_SESSION['nama'] = $namabaru;
 			}
-			if($nama !=""){
-				$queryUpdate = "UPDATE anggota SET nama = '$nama' WHERE email = '$email'";
-				$conn->executeNonQuery($queryUpdate);
-				$ganti=true;
-				$_SESSION['nama']=$nama;
-				$tempText ="You are logged in as ".$nama;
-				$tempText2=" Name: ".$nama;
-				echo "<script>document.getElementById('log').innerHTML='$tempText'</script>";
-				echo "<script>document.getElementById('namaForm').innerHTML='$tempText2'</script>";				
+			if($berubah == true){
+				echo "<p id='pUpdate' class='updated'>Profile Updated!</p>";
 			}
-			if($ganti==true){
-				$print= "<p id='pUpdate' class='updated'>Profile Updated";
-			}
-			if($pass!=""){
-				$print.="<br><span id='spanUpdate'>Please use your new password for the next login.</span></p>";
-			}
-			else{
-				$print.="</p>";
-			}
-			echo $print;
 		}
 	}
 ?>

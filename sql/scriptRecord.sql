@@ -1,16 +1,16 @@
 -- Nama basis data: perpustakaantbd
 
 -- Buku
-insert into buku(judulbuku)
-values ('Algoritma dan Struktur Data');
-insert into buku(judulbuku)
-values ('Introduction to Algorithm');
-insert into buku(judulbuku)
-values ('Programming for Dummies');
-insert into buku(judulbuku)
-values ('Manage the Economy');
-insert into buku(judulbuku)
-values ('Network Security');
+insert into buku(judulbuku,deleted)
+values ('Algoritma dan Struktur Data',0);
+insert into buku(judulbuku,deleted)
+values ('Introduction to Algorithm',0);
+insert into buku(judulbuku,deleted)
+values ('Programming for Dummies',0);
+insert into buku(judulbuku,deleted)
+values ('Manage the Economy',0);
+insert into buku(judulbuku,deleted)
+values ('Network Security',0);
 
 -- Pengarang
 insert into pengarang(namapengarang)
@@ -87,16 +87,16 @@ insert into bukukata(idbuku, idkata, jmlkemunculan, bobot)
 values (5,5,1,0);
 
 -- Eksemplar
-insert into eksemplar(idbuku, status)
-values (1,0);
-insert into eksemplar(idbuku, status)
-values (2,0);
-insert into eksemplar(idbuku, status)
-values (3,0);
-insert into eksemplar(idbuku, status)
-values (4,1);
-insert into eksemplar(idbuku, status)
-values (5,1);
+insert into eksemplar(idbuku,status,deleted)
+values (1,0,0);
+insert into eksemplar(idbuku,status,deleted)
+values (2,0,0);
+insert into eksemplar(idbuku,status,deleted)
+values (3,0,0);
+insert into eksemplar(idbuku,status,deleted)
+values (4,1,0);
+insert into eksemplar(idbuku,status,deleted)
+values (5,1,0);
 
 -- Anggota
 insert into anggota(email,nama,sandi,tipe)
