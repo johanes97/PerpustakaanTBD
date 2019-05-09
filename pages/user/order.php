@@ -3,6 +3,14 @@
 <?php
 	include ('../../OpenConnection.php'); 
 	session_start();
+	$query = $conn->getQuery();
+	
+	if(isSet($_GET['cancelbutton'])){
+		$idpemesanandihapus = $_GET['idpemesanandihapus'];
+		
+		$queryhapusorder = "CALL hapuspemesanan($idpemesanandihapus);";
+		$conn->executeNonQuery($queryhapusorder);
+	}
 ?>
 
 <html>
@@ -26,23 +34,43 @@
 				include ('../../side.php');
 			?>
 			<div class="article">
-				<div class="opening2"><p id="judul">Order</p>
+				<div class="opening2"><p id="judul">Orders</p>
+					<form class="pilihanCari" action="" method="get">
+						<input type="text" name="textInput" placeholder="Search orders..." class="cari">
+						<span class="cari" id="by"><pre> by </pre></span>
+						<select name="pilihan" class="cari">
+							<option value="buku">Book</option>
+						</select>
+						<input id="button" name="iSearch" type="submit" value="SEARCH" class="cari">
+					</form>
 				</div>
 				<div class="main">
 					<table>
-						<tr><th>Book Title</th><th>Order Date</th><th>Status</th>
+						<tr><th>Book Title</th><th>Order Date</th><th>-</th><tr>
 						<?php
-							$email = $_SESSION['email'];
-							$queryShowPeminjaman = "CALL caripemesanan('$email');";
-							$query = $conn->getQuery();
+							$emaillogin = $_SESSION['email'];
+							$querypemesanan = "CALL semuapemesanan('WAITING','$emaillogin');";
 							
-							if($result = $query->query($queryShowPeminjaman)){
+							if(isset($_GET['iSearch'])){
+								$keyword = $_GET['textInput'];
+								$pilihanpencarian = $_GET['pilihan'];
+
+								$querypemesanan = "CALL caripemesanan('$pilihanpencarian','$keyword','WAITING','$emaillogin');";
+							}
+							
+							if($result = $query->query($querypemesanan)){
 								while($row = $result->fetch_array()){
+									echo "<form action='' method='get'>";
+									
 									echo "<tr>";
 									echo "<td>" . $row['judulbuku'] . "</td>";
 									echo "<td>" . $row['tglpemesanan'] . "</td>";
 									echo "<td>" . $row['statuspemesanan'] . "</td>";
+									echo "<input name='idpemesanandihapus' type='hidden' value='" . $row['idpemesanan'] . "'>";
+									echo "<td><input name='cancelbutton' type='submit' value='CANCEL' class='iBForm'></td>";
 									echo "</tr>";
+									
+									echo "</form>";
 								}
 							}
 						?>

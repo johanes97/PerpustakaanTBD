@@ -3,6 +3,7 @@
 <?php
 	include('../../OpenConnection.php'); 
 	session_start();
+	$query = $conn->getQuery();
 	
 	if(isSet($_GET['deletebutton'])){
 		$idbukudihapus = $_GET['idbukudihapus'];
@@ -34,7 +35,7 @@
 				include ('../../sideAdmin.php');
 			?>
 			<div class="article">
-				<div class="opening2"><p id="judul">Book List</p>
+				<div class="opening2"><p id="judul">Books</p>
 					<form class="pilihanCari" action="">
 						<input type="text" name="textInput" placeholder="Search books." class="cari">
 						<span class="cari" id="by"><pre> by </pre></span>
@@ -44,7 +45,7 @@
 							<option value="pengarang">Author</option>
 						</select>
 						<input id="button" name="iSearch" type="submit" value="SEARCH" class="cari">
-						<input id="button2" name="iAdd" type="submit" value="ADD BOOK" class="cari">
+						<input id="button2" name="iAdd" type="submit" value="ADD" class="cari">
 					</form>
 				</div>
 				<div class="main">
@@ -52,18 +53,16 @@
 					<table>
 						<tr><th>Book ID</th><th>Book Title</th><th>Author</th><th>Tag</th><th>Eksemplar Tersedia</th><th>-</th></tr>
 						<?php
-							$queryShowBook="CALL semuabuku()";
-							$query = $conn->getQuery();
+							$querysemuabuku = "CALL semuabuku()";
 
 							if(isset($_GET['iSearch'])){
-								$textInput = $_GET['textInput'];
-								$pilihan = $_GET['pilihan'];
+								$keyword = $_GET['textInput'];
+								$pilihanpencarian = $_GET['pilihan'];
 
-								if($textInput == "") $queryCari="";
-								$queryShowBook = "CALL caribuku('$pilihan','$textInput');";
+								$querysemuabuku = "CALL caribuku('$pilihanpencarian','$keyword');";
 							}
 								
-							if($result = $query->query($queryShowBook)){
+							if($result = $query->query($querysemuabuku)){
 								while($row = $result->fetch_array()){
 									echo "<form action='' method='get'>";
 									

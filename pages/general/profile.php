@@ -3,6 +3,7 @@
 <?php  
 	include ('../../OpenConnection.php');
 	session_start();
+	$query = $conn->getQuery();
 ?>
 
 <html>
@@ -97,8 +98,8 @@
 			echo "<script>show()</script>";
 		}
 		else{
-			$queryupdateprofil = "CALL updateprofil('$emaillogin','$namabaru','$sandibaru');";
-			$conn->executeNonQuery($queryupdateprofil);
+			$queryupdateanggota = "CALL updateanggota('$emaillogin','$namabaru','$sandibaru');";
+			$conn->executeNonQuery($queryupdateanggota);
 			$berubah=true;
 			
 			if($namabaru != ""){

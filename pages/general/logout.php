@@ -3,8 +3,7 @@
 <?php
 	include ('../../OpenConnection.php');
 	session_start();
-	session_unset();
-	session_destroy();
+	$query = $conn->getQuery();
 ?>
 
 <html>
@@ -35,3 +34,8 @@
 </body>
 
 </html>
+
+<?php
+	session_unset();
+	session_destroy();
+?>

@@ -3,6 +3,7 @@
 <?php
 	include ('../../OpenConnection.php');
 	session_start();
+	$query = $conn->getQuery();
 	
 	if(isSet($_GET['acceptbutton'])){
 		$idpemesananditerima = $_GET['idpemesananditerima'];
@@ -33,15 +34,30 @@
 				include ('../../sideAdmin.php');
 			?>
 			<div class="article">
-				<div class="opening2"><p id="judul">Order List</p></div>
+				<div class="opening2"><p id="judul">Orders</p></div>
+					<form class="pilihanCari" action="" method="get">
+						<input type="text" name="textInput" placeholder="Search orders..." class="cari">
+						<span class="cari" id="by"><pre> by </pre></span>
+						<select name="pilihan" class="cari">
+							<option value="buku">Book</option>
+							<option value="anggota">Member</option>
+						</select>
+						<input id="button" name="iSearch" type="submit" value="SEARCH" class="cari">
+					</form>
 				<div class="main">
 					<table>
 						<tr><th>Book Title</th><th>Member</th><th>Order Date</th><th>-</th>
 						<?php										
-							$queryShowPeminjaman = "CALL semuapemesananwaiting();";
-							$query = $conn->getQuery();
+							$querypemesanan = "CALL semuapemesanan('WAITING','');";
 							
-							if($result = $query->query($queryShowPeminjaman)){
+							if(isset($_GET['iSearch'])){
+								$keyword = $_GET['textInput'];
+								$pilihanpencarian = $_GET['pilihan'];
+
+								$querypemesanan = "CALL caripemesanan('$pilihanpencarian','$keyword','WAITING','');";
+							}
+							
+							if($result = $query->query($querypemesanan)){
 								while($row = $result->fetch_array()){
 									echo "<form action='' method='get'>";
 									

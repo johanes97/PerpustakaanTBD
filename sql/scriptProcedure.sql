@@ -1,95 +1,21 @@
---Procedure untuk sign up (signup.php)
-CREATE DEFINER=`root`@`localhost` PROCEDURE `signup`(
-	IN emailInput varchar(100),
-    IN nameInput varchar(100),
-    IN passwordInput varchar(100),
-    IN tipeInput varchar(100)
-)
-BEGIN
-	if (select count(email) from anggota where email=emailInput)=0 then 
-		insert into anggota values(emailInput,nameInput,passwordInput,tipeInput);
-    end if;
-END
-
--- Procedure untuk login (login.php)
-CREATE DEFINER=`root`@`localhost` PROCEDURE `login`(
-	IN emailInput varchar(100),
-    IN sandiInput varchar(100)
-)
-BEGIN
-	if (select count(email) from anggota where email=emailInput and sandi=sandiInput)>0 then 
-        select *,1 as 'validEmail',1 as 'validPassword' from anggota where email=emailInput and sandi=sandiInput;
-	elseif (select count(email) from anggota where email=emailInput)>0 then 
-         select *,1 as 'validEmail',0 as 'validPassword' from anggota where email=emailInput;
-    end if;
-END
-
--- ADMIN
-
--- Procedure untuk menambah buku sekaligus kata, tag, dan pengarangnya
--- (Sudah dibuat sql biasa)
-
--- Procedure untuk menambah eksemplar
-
--- Procedure untuk menambah denda
-	
--- Procedure untuk mencari nilai IDF setiap kata
-
--- Procedure untuk menghitung bobot setiap kata berdasarkan IDF-nya
-
---Procedure untuk mencari semua member (memberlist.php)
-CREATE DEFINER=`root`@`localhost` PROCEDURE `semuaanggotabiasa`()
-BEGIN
-	select
-		*
-	from
-		anggota
-	where
-		anggota.tipe like 'user_biasa';
-END
-
--- Procedure untuk mencari semua administrator (adminlist.php)
-CREATE DEFINER=`root`@`localhost` PROCEDURE `semuadmin`()
-BEGIN
-	select
-		*
-	from
-		anggota
-	where
-		anggota.tipe like 'admin';
-END
-
--- Procedure untuk melakukan perpanjangan masa pinjam buku
-
--- Procedure untuk laporan buku-buku yang sering dipinjam
-
--- Procedure untuk laporan buku-buku yang sering dipinjam berdasarkan pengarang
-
--- Procedure untuk laporan tag-tag dari buku-buku yang sering dipinjam.
-
--- Procedure untuk laporan tag-tag yang sering dipinjam oleh seorang anggota.
-
--- Procedure untuk laporan rekomendasi buku bagi seorang anggota.
+--SEMUA DELIMITER //
 
 
 
 
 
 
---GENERAL
+--BUKU
 
 --BUKU: Mendapatkan daftar seluruh buku beserta pengarang, tag, kata, dan jumlah eksemplar (book.php books.php)(BELUM SELESAI)(BAGIAN TAG MASIH SALAH)
 CREATE DEFINER=`root`@`localhost` PROCEDURE `semuabuku`()
 BEGIN
-	select distinct
-		*
-	from
-		buku
-		inner join bukupengarang on buku.idbuku = bukupengarang.idbuku
+	select distinct *
+	from bukupengarang
+		inner join buku on buku.idbuku = bukupengarang.idbuku
 		inner join pengarang on pengarang.idpengarang = bukupengarang.idpengarang
-	where
-		buku.deleted = 0;
-END
+	where buku.deleted = 0;
+END //
 
 --BUKU: Mencari buku berdasarkan judul, pengarang, atau tag (book.php books.php)(BELUM SELESAI)(BAGIAN TAG MASIH SALAH, BELUM MENGGUNAKAN IDF/BOBOT)
 CREATE DEFINER=`root`@`localhost` PROCEDURE `caribuku`(
@@ -101,107 +27,137 @@ BEGIN
 	
 	if (pilihanpencarian = 'judul') then
 		
-		select distinct
-			*
-		from
-			buku
-			inner join bukupengarang on buku.idbuku = bukupengarang.idbuku
+		select distinct *
+		from bukupengarang
+			inner join buku on buku.idbuku = bukupengarang.idbuku
 			inner join pengarang on pengarang.idpengarang = bukupengarang.idpengarang
-		where
-			buku.deleted = 0,
-			buku.judulbuku like keyword;
+		where buku.deleted = 0 && buku.judulbuku like keyword;
 	
 	elseif (pilihanpencarian = 'pengarang') then
 	
-		select distinct
-			*
-		from
-			buku
-			inner join bukupengarang on buku.idbuku = bukupengarang.idbuku
+		select distinct *
+		from bukupengarang
+			inner join buku on buku.idbuku = bukupengarang.idbuku
 			inner join pengarang on pengarang.idpengarang = bukupengarang.idpengarang
-		where
-			buku.deleted = 0,
-			pengarang.namapengarang like keyword;
+		where buku.deleted = 0 && pengarang.namapengarang like keyword;
 	
 	elseif (pilihanpencarian = 'tag') then
 		
-		select distinct
-			*
-		from
-			buku;
+		select distinct *
+		from buku;
 	
 	end if;
-END
+END //
 
---BUKU: menghapus buku (Books.php)
+--BUKU: menghapus buku berdasarkan id buku (Books.php)(TESTED)
 CREATE DEFINER=`root`@`localhost` PROCEDURE `hapusbuku`(
 	IN idbukudihapus int
 )
 BEGIN
+	delete from pemesanan
+	where pemesanan.idbuku = idbukudihapus;
+	
 	delete from bukupengarang
-	where idbuku = idbukudihapus;
+	where bukupengarang.idbuku = idbukudihapus;
 	
 	delete from bukutag
-	where idbuku = idbukudihapus;
+	where bukutag.idbuku = idbukudihapus;
 		
 	delete from bukukata
-	where idbuku = idbukudihapus;
+	where bukukata.idbuku = idbukudihapus;
 		
 	update eksemplar
 	set deleted = 1
-	where idbuku = idbukudihapus;
+	where ekssemplar.idbuku = idbukudihapus;
 	
 	update buku
 	set deleted = 1
-	where idbuku = idbukudihapus;
-END
+	where buku.idbuku = idbukudihapus;
+END //
 
---PEMESANAN: mendapatkan daftar seluruh pemesanan, dapat berfungsi sebagai laporan (order.php orders.php)
-CREATE DEFINER=`root`@`localhost` PROCEDURE `semuapemesanan`()
-BEGIN
-	select
-		*
-	from
-		buku
-		inner join pemesanan on buku.idbuku = pemesanan.idbuku
-		inner join anggota on pemesanan.email = anggota.email
-	order by
-		statuspemesanan desc, tglpemesanan asc;
-END
 
---PEMESANAN: mendapatkan daftar seluruh pemesanan yang masih berstatus WAITING (orders.php)
-CREATE DEFINER=`root`@`localhost` PROCEDURE `semuapemesananwaiting`()
-BEGIN
-	select
-		*
-	from
-		buku
-		inner join pemesanan on buku.idbuku = pemesanan.idbuku
-		inner join anggota on pemesanan.email = anggota.email
-	where
-		statuspemesanan like 'WAITING'
-	order by
-		statuspemesanan desc, tglpemesanan asc;
-END
 
---PEMESANAN: mendapatkan daftar pemesanan anggota yang login (order.php)
-CREATE DEFINER=`root`@`localhost` PROCEDURE `caripemesanan`(
+
+
+
+
+
+
+
+--PEMESANAN (SELESAI)
+
+--PEMESANAN: Mendapatkan daftar seluruh pemesanan, baik untuk anggota yang login maupun admin (order.php orders.php)(TESTED)
+CREATE DEFINER=`root`@`localhost` PROCEDURE `semuapemesanan`(
+	IN statusdicari varchar(100),
 	IN emaillogin varchar(100)
 )
 BEGIN
-	select
-		*
-	from
-		buku
-		inner join pemesanan on buku.idbuku = pemesanan.idbuku
-		inner join anggota on pemesanan.email = anggota.email
-	where
-		anggota.email like emaillogin
-	order by
-		statuspemesanan desc, tglpemesanan asc;
-END
+	if (emaillogin not like '') then
+		
+		select *
+		from pemesanan
+			inner join buku on buku.idbuku = pemesanan.idbuku
+			inner join anggota on pemesanan.email = anggota.email
+		where anggota.email like emaillogin && pemesanan.statuspemesanan like statusdicari
+		order by pemesanan.statuspemesanan desc, pemesanan.tglpemesanan asc;
+		
+	else
+	
+		select *
+		from pemesanan
+			inner join buku on buku.idbuku = pemesanan.idbuku
+			inner join anggota on pemesanan.email = anggota.email
+		where pemesanan.statuspemesanan like statusdicari
+		order by pemesanan.statuspemesanan desc, pemesanan.tglpemesanan asc;
+		
+	end if;
+END //
 
---PEMESANAN: menambahkan pemesanan sesuai anggota yang login (book.php)
+--PEMESANAN: Mencari daftar pemesanan, baik untuk anggota yang login maupun admin (order.php orders.php)(TESTED)
+CREATE DEFINER=`root`@`localhost` PROCEDURE `caripemesanan`(
+	IN pilihanpencarian varchar(100),
+	IN keyword varchar(100),
+	IN statusdicari varchar(100),
+	IN emaillogin varchar(100)
+)
+BEGIN
+	set keyword = concat('%',keyword,'%');
+
+	if (emaillogin not like '') then
+		
+		select *
+		from pemesanan
+			inner join buku on buku.idbuku = pemesanan.idbuku
+			inner join anggota on pemesanan.email = anggota.email
+		where pemesanan.statuspemesanan like statusdicari && anggota.email like emaillogin && buku.judulbuku like keyword
+		order by statuspemesanan desc, tglpemesanan asc;
+		
+	else
+	
+		if (pilihanpencarian like 'buku') then
+		
+			select *
+			from pemesanan
+				inner join buku on buku.idbuku = pemesanan.idbuku
+				inner join anggota on pemesanan.email = anggota.email
+			where pemesanan.statuspemesanan like statusdicari && buku.judulbuku like keyword
+			order by statuspemesanan desc, tglpemesanan asc;
+		
+		elseif (pilihanpencarian like 'anggota') then
+		
+			select *
+			from pemesanan
+				inner join buku on buku.idbuku = pemesanan.idbuku
+				inner join anggota on pemesanan.email = anggota.email
+			where pemesanan.statuspemesanan like statusdicari && anggota.nama like keyword
+			order by statuspemesanan desc, tglpemesanan asc;
+			
+		end if;
+	
+	end if;
+END //
+
+--PEMESANAN: menambahkan pemesanan anggota yang login (book.php)(TESTED)
 CREATE DEFINER=`root`@`localhost` PROCEDURE `tambahpemesanan`(
 	IN emailpemesan varchar(100),
 	IN idbukudipesan int
@@ -209,59 +165,214 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `tambahpemesanan`(
 BEGIN
 	insert into pemesanan(email,idbuku,tglpemesanan,statuspemesanan)
 	values (emailpemesan,idbukudipesan,now(),'WAITING');
-END
+END //
 
---PEMESANAN: menerima pemesanan anggota (orders.php)
+--PEMESANAN: menerima pemesanan anggota (orders.php)(TESTED)
 CREATE DEFINER=`root`@`localhost` PROCEDURE `terimapemesanan`(
 	IN idpemesananditerima int
 )
 BEGIN
-	update
-		pemesanan 
-	set
-		statuspemesanan = 'ACCEPTED'
-	where
-		idpemesanan = idpemesananditerima;
-END
+	update pemesanan 
+	set statuspemesanan = 'ACCEPTED'
+	where idpemesanan = idpemesananditerima;
+END //
 
---PEMINJAMAN: mendapatkan daftar seluruh peminjaman, dapat berfungsi sebagai laporan (borrow.php borrows.php)(BELUM SELESAI)
-CREATE DEFINER=`root`@`localhost` PROCEDURE `semuapemesanan`()
+--PEMESANAN: menghapus pemesanan anggota yang login (order.php)(TESTED)
+CREATE DEFINER=`root`@`localhost` PROCEDURE `hapuspemesanan`(
+	IN idpemesanandihapus int
+)
 BEGIN
-	select
-		*
-	from
-		eksemplar
-		inner join peminjaman on eksemplar.idbuku = peminjaman.idbuku
-		inner join anggota on peminjaman.email = anggota.email
-	order by
-		bataspengembalian asc;
-END
+	delete from pemesanan
+	where idpemesanan = idpemesanandihapus;
+END //
 
---Procedure untuk mengupdate profil (profil.php)
-CREATE DEFINER=`root`@`localhost` PROCEDURE `updateprofil`(
+
+
+
+
+
+
+
+
+--PEMINJAMAN
+
+--PEMINJAMAN: Mendapatkan seluruh peminjaman, baik untuk anggota yang login maupun admin (borrow.php borrows.php)(TESTED)
+CREATE DEFINER=`root`@`localhost` PROCEDURE `semuapeminjaman`(
+	IN statusdicari varchar(100),
+	IN emaillogin varchar(100)
+)
+BEGIN
+	if (emaillogin not like '') then
+	
+		select *
+		from peminjaman
+			inner join anggota on anggota.email = peminjaman.email
+			inner join eksemplar on eksemplar.ideksemplar = peminjaman.ideksemplar
+			inner join buku on buku.idbuku = eksemplar.idbuku
+			inner join bukupengarang on bukupengarang.idbuku = buku.idbuku
+			inner join pengarang on pengarang.idpengarang = bukupengarang.idpengarang
+		where peminjaman.email like emaillogin && peminjaman.statuspeminjaman like statusdicari
+		order by peminjaman.bataspengembalian asc;
+	
+	else
+	
+		select *
+		from peminjaman
+			inner join anggota on anggota.email = peminjaman.email
+			inner join eksemplar on eksemplar.ideksemplar = peminjaman.ideksemplar
+			inner join buku on buku.idbuku = eksemplar.idbuku
+			inner join bukupengarang on bukupengarang.idbuku = buku.idbuku
+			inner join pengarang on pengarang.idpengarang = bukupengarang.idpengarang
+		where peminjaman.statuspeminjaman like statusdicari
+		order by peminjaman.bataspengembalian asc;
+	
+	end if;
+END //
+
+--PEMINJAMAN: Mencari seluruh peminjaman (borrows.php)
+CREATE DEFINER=`root`@`localhost` PROCEDURE `caripeminjaman`(
+	IN pilihanpencarian varchar(100),
+	IN keyword varchar(100),
+	IN statusdicari varchar(100)
+)
+BEGIN
+	set keyword = concat('%',keyword,'%');
+
+	if (pilihanpencarian like '') then
+	
+		select *
+		from peminjaman
+			inner join anggota on anggota.email = peminjaman.email
+			inner join eksemplar on eksemplar.ideksemplar = peminjaman.ideksemplar
+			inner join buku on buku.idbuku = eksemplar.idbuku
+			inner join bukupengarang on bukupengarang.idbuku = buku.idbuku
+			inner join pengarang on pengarang.idpengarang = bukupengarang.idpengarang
+		where peminjaman.email like emaillogin && peminjaman.statuspeminjaman like statusdicari
+		order by peminjaman.bataspengembalian asc;
+	
+	elseif (pilihanpencarian like '') then
+	
+		select *
+		from peminjaman
+			inner join anggota on anggota.email = peminjaman.email
+			inner join eksemplar on eksemplar.ideksemplar = peminjaman.ideksemplar
+			inner join buku on buku.idbuku = eksemplar.idbuku
+			inner join bukupengarang on bukupengarang.idbuku = buku.idbuku
+			inner join pengarang on pengarang.idpengarang = bukupengarang.idpengarang
+		where peminjaman.statuspeminjaman like statusdicari
+		order by peminjaman.bataspengembalian asc;
+	
+	end if;
+END //
+
+--PEMINJAMAN: Menghapus peminjaman (borrows.php)(TESTED)
+CREATE DEFINER=`root`@`localhost` PROCEDURE `hapuspeminjaman`(
+	IN idpeminjamandihapus int
+)
+BEGIN
+	update peminjaman
+	set peminjaman.statuspeminjaman = 'INACTIVE'
+	where peminjaman.idpeminjaman = idpeminjamandihapus;
+END //
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+--ANGGOTA (SELESAI)
+
+--ANGGOTA: Mencari semua anggota berdasarkan tipe (memberlist.php adminlist.php)(TESTED)
+CREATE DEFINER=`root`@`localhost` PROCEDURE `semuaanggota`(
+	IN tipeanggota varchar(50)
+)
+BEGIN
+	select *
+	from anggota
+	where anggota.tipe like tipeanggota;
+END //
+
+--ANGGOTA: Mencari anggota berdasarkan email atau nama, biasa atau admin (memberlist.php adminlist.php)(TESTED)
+CREATE DEFINER=`root`@`localhost` PROCEDURE `carianggota`(
+	IN pilihanpencarian varchar(100),
+	IN keyword varchar(100),
+	IN tipedicari varchar(100)
+)
+BEGIN
+	set keyword = concat('%',keyword,'%');
+
+	if (pilihanpencarian like 'email') then
+	
+		select *
+		from anggota
+		where anggota.tipe like tipedicari && anggota.email like keyword;
+	
+	elseif (pilihanpencarian like 'nama') then
+	
+		select *
+		from anggota
+		where anggota.tipe like tipedicari && anggota.nama like keyword;
+	
+	end if;
+END //
+
+--ANGGOTA: Procedure untuk login (login.php)(TESTED)
+CREATE DEFINER=`root`@`localhost` PROCEDURE `login`(
+	IN emailInput varchar(100),
+    IN sandiInput varchar(100)
+)
+BEGIN
+	if (select count(email) from anggota where email=emailInput and sandi=sandiInput)>0 then 
+        select *,1 as 'validEmail',1 as 'validPassword' from anggota where email=emailInput and sandi=sandiInput;
+	elseif (select count(email) from anggota where email=emailInput)>0 then 
+         select *,1 as 'validEmail',0 as 'validPassword' from anggota where email=emailInput;
+    end if;
+END //
+
+--ANGGOTA: Menambah anggota (signup.php)(TESTED)
+CREATE DEFINER=`root`@`localhost` PROCEDURE `tambahanggota`(
+	IN emailInput varchar(100),
+    IN nameInput varchar(100),
+    IN passwordInput varchar(100),
+    IN tipeInput varchar(100)
+)
+BEGIN
+	if (select count(email) from anggota where email=emailInput)=0 then 
+		insert into anggota values(emailInput,nameInput,passwordInput,tipeInput);
+    end if;
+END //
+
+--ANGGOTA: Procedure untuk mengupdate profil (profil.php)(TESTED)
+CREATE DEFINER=`root`@`localhost` PROCEDURE `updateanggota`(
 	IN emaillogin varchar(100),
 	IN namabaru varchar(100),
 	IN sandibaru varchar(100)
 )
 BEGIN		
-	if (namabaru != '') then
-		update
-			anggota
-		set
-			nama = namabaru
-		where
-			email like emaillogin;
+	if (namabaru not like '') then
+		
+		update anggota
+		set nama = namabaru
+		where email like emaillogin;
+	
 	end if;
 	
-	if (sandibaru != '') then
-		update
-			anggota
-		set
-			sandi = sandibaru
-		where
-			email like emaillogin;
+	if (sandibaru not like '') then
+	
+		update anggota
+		set sandi = sandibaru
+		where email like emaillogin;
+	
 	end if;
-END
+END //
 
 
 
@@ -269,19 +380,27 @@ END
 
 
 
--- MEMBER
+-- Procedure untuk menambah eksemplar
+
+-- Procedure untuk menambah denda
+
+-- Procedure untuk mencari nilai IDF setiap kata
+
+-- Procedure untuk menghitung bobot setiap kata berdasarkan IDF-nya
+
+-- Procedure untuk laporan buku-buku yang sering dipinjam
+
+-- Procedure untuk laporan buku-buku yang sering dipinjam berdasarkan pengarang
+
+-- Procedure untuk laporan tag-tag dari buku-buku yang sering dipinjam.
+
+-- Procedure untuk laporan tag-tag yang sering dipinjam oleh seorang anggota.
+
+-- Procedure untuk laporan rekomendasi buku bagi seorang anggota.
 
 --Procedure untuk mencari rekomendasi buku untuk member
 
 -- Procedure untuk melakukan peminjaman buku dengan judul buku dan eksemplar tertentu.
-
--- Procedure untuk melakukan pemesanan buku
-
--- Procedure untuk mencari semua pengembalian buku
--- (Sudah dibuat sql biasa)
-
--- Procedure untuk mencari semua pemesanan buku
--- (Sudah dibuat sql biasa)
 
 -- Procedure untuk mengingatkan pengembalian buku
 

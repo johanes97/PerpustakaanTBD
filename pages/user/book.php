@@ -3,6 +3,7 @@
 <?php
 	include('../../OpenConnection.php');
 	session_start();
+	$query = $conn->getQuery();
 
 	if(isSet($_GET['orderbutton'])){
 		$emailpemesan = $_SESSION['email'];
@@ -10,8 +11,6 @@
 		
 		$queryaddorder = "CALL tambahpemesanan('$emailpemesan',$idbukudipesan);";
 		$conn->executeNonQuery($queryaddorder);
-		
-		echo "<script>modalOn();</script>";
 	}
 ?>
 
@@ -36,7 +35,7 @@
 				include ('../../side.php');
 			?>
 			<div class="article">
-				<div class="opening2"><p id="judul">Book List</p>
+				<div class="opening2"><p id="judul">Books</p>
 					<form class="pilihanCari" action="" method="get">
 						<input type="text" name="textInput" placeholder="Search books..." class="cari">
 						<span class="cari" id="by"><pre> by </pre></span>
@@ -52,18 +51,16 @@
 					<table>
 						<tr><th>Book ID</th><th>Book Title</th><th>Author</th><th>Tag</th><th>-</th></tr>
 						<?php
-							$queryShowBook="CALL semuabuku()";
-							$query = $conn->getQuery();
+							$querybuku="CALL semuabuku()";
 
 							if(isset($_GET['iSearch'])){
-								$textInput = $_GET['textInput'];
-								$pilihan = $_GET['pilihan'];
+								$keyword = $_GET['textInput'];
+								$pilihanpencarian = $_GET['pilihan'];
 
-								if($textInput == "") $queryCari="";
-								$queryShowBook = "CALL caribuku('$pilihan','$textInput');";
+								$querybuku = "CALL caribuku('$pilihanpencarian','$keyword');";
 							}
 							
-							if($result = $query->query($queryShowBook)){
+							if($result = $query->query($querybuku)){
 								while($row = $result->fetch_array()){
 									echo "<form action='' method='get'>";
 									

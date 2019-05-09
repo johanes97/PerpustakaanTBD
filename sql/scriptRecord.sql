@@ -119,9 +119,9 @@ insert into pemesanan(email,idbuku,tglpemesanan,statuspemesanan)
 values ('irwanSiKasep@gmail.com',2,'2018-12-25','ACCEPTED');
 
 -- Peminjaman
-insert into peminjaman(email, ideksemplar, tglpeminjaman, tglpengembalian, bataspengembalian, durasihariterlambat, besardenda)
-values ('kasepSumasep@gmail.com',1,'2019-04-10','2019-04-17','2019-04-22', 5, 25000);
-insert into peminjaman(email, ideksemplar, tglpeminjaman, tglpengembalian, bataspengembalian, durasihariterlambat, besardenda)
-values ('irwanSiKasep@gmail.com',2,'2019-04-10','2019-04-17','2019-05-02', 15, 125000);
-insert into peminjaman(email, ideksemplar, tglpeminjaman, tglpengembalian, bataspengembalian, durasihariterlambat, besardenda)
-values ('alvinussutendy@gmail.com',3,'2019-04-10','2019-04-17','2019-04-22', 5, 25000);
+insert into peminjaman(email, ideksemplar, tglpeminjaman, tglpengembalian, bataspengembalian, durasihariterlambat, besardenda, statuspeminjaman)
+values ('kasepSumasep@gmail.com',1,'2019-04-10','2019-04-17','2019-04-22', 5, 25000, 'ACTIVE');
+insert into peminjaman(email, ideksemplar, tglpeminjaman, tglpengembalian, bataspengembalian, durasihariterlambat, besardenda, statuspeminjaman)
+values ('irwanSiKasep@gmail.com',2,'2019-04-10','2019-04-17','2019-05-02', 15, 125000, 'ACTIVE');
+insert into peminjaman(email, ideksemplar, tglpeminjaman, tglpengembalian, bataspengembalian, durasihariterlambat, besardenda, statuspeminjaman)
+values ('alvinussutendy@gmail.com',3,'2019-04-10','2019-04-17','2019-04-22', 5, 25000, 'ACTIVE');
