@@ -65,7 +65,7 @@ create table peminjaman(
 	tglpeminjaman date not null,
 	tglpengembalian date,
 	bataspengembalian date not null,
-	durasihariterlambat int,
-	besardenda int,
+	durasihariterlambat int not null,
+	besardenda int not null,
 	statuspeminjaman varchar(50)
 );

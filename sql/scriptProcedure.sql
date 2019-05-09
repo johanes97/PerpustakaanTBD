@@ -229,6 +229,50 @@ BEGIN
 	end if;
 END //
 
+--PEMINJAMAN: Menghitung denda (prosedur-semuapeminjaman)
+CREATE DEFINER=`root`@`localhost` PROCEDURE `updatepeminjaman`()
+BEGIN
+	declare cursorpeminjaman cursor for
+	select peminjaman.idpeminjaman, peminjaman.bataspengembalian
+	from peminjaman;
+	
+	declare flagfinished int default 0;
+	declare continue handler for not found set flagfinished = 1;
+	
+	declare vrbidpeminjaman int;
+	declare vrbbataspengembalian date;
+	
+	open cursorpeminjaman;
+	
+		get_variabel: loop
+			
+			fetch cursorpeminjaman
+			into vrbidpeminjaman, vrbbataspengembalian;
+			
+			if (flagfinished = 1) then
+				leave get_variabel;
+			end if;
+	
+			declare dateinterval int;
+			set dateinterval = datediff(vrbbataspengembalian,curdate());
+			
+			if (dateinterval < 0) then
+	
+				update peminjaman
+				set peminjaman.durasihariterlambat = abs(dateinterval)
+				where peminjaman.idpeminjaman = vrbidpeminjaman;
+				
+				update peminjaman
+				set peminjaman.besardenda = 1000*abs(dateinterval)
+				where peminjaman.idpeminjaman = vrbidpeminjaman;
+				
+			end if;
+	
+		end loop get_variabel;
+	
+	close cursorpeminjaman;
+END //
+
 --PEMINJAMAN: Mencari seluruh peminjaman (borrows.php)
 CREATE DEFINER=`root`@`localhost` PROCEDURE `caripeminjaman`(
 	IN pilihanpencarian varchar(100),
@@ -265,6 +309,25 @@ BEGIN
 	end if;
 END //
 
+--PEMINJAMAN: Menambahkan peminjaman (borrows.php)(TESTED)
+CREATE DEFINER=`root`@`localhost` PROCEDURE `tambahpeminjaman`(
+	IN emailpeminjam varchar(100),
+	IN idbukudipinjam int,
+	IN bataspeminjaman date
+)
+BEGIN
+	declare ideksemplardipinjam int;
+	
+	select eksemplar.ideksemplar
+	into ideksemplardipinjam
+	from eksemplar
+		inner join buku on buku.idbuku = eksemplar.idbuku
+	where buku.idbuku = idbukudipinjam;
+	
+	insert into peminjaman(email,ideksemplar,tglpeminjaman,bataspengembalian,durasihariterlambat,besardenda,statuspeminjaman)
+	values (emailpeminjam,ideksemplardipinjam,now(),bataspeminjaman,0,0,'ACTIVE');
+END //
+
 --PEMINJAMAN: Menghapus peminjaman (borrows.php)(TESTED)
 CREATE DEFINER=`root`@`localhost` PROCEDURE `hapuspeminjaman`(
 	IN idpeminjamandihapus int
@@ -272,6 +335,10 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `hapuspeminjaman`(
 BEGIN
 	update peminjaman
 	set peminjaman.statuspeminjaman = 'INACTIVE'
+	where peminjaman.idpeminjaman = idpeminjamandihapus;
+	
+	update peminjaman
+	set peminjaman.tglpengembalian = now()
 	where peminjaman.idpeminjaman = idpeminjamandihapus;
 END //
 

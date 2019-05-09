@@ -11,6 +11,18 @@
 		$queryhapuspeminjaman = "CALL hapuspeminjaman($idpeminjamandihapus);";
 		$conn->executeNonQuery($queryhapuspeminjaman);
 	}
+	
+	if(isset($_GET['add'])){ 
+		$emailpeminjam = $_GET['emailpeminjam'];
+		$idbukudipinjam = $_GET['idbukudipinjam']; 
+		$bataspeminjaman = $_GET['bataspeminjaman'];
+		
+		$querytambahpeminjaman = "CALL tambahpeminjaman('$emailpeminjam',$idbukudipinjam,'$bataspeminjaman');";
+		
+		if($emailpeminjam != "" && $idbukudipinjam != "" && $bataspeminjaman != ""){
+			$conn->executeNonQuery($querytambahpeminjaman);
+		}
+	}
 ?>
 
 <html>
@@ -34,10 +46,14 @@
 				include ('../../sideAdmin.php');
 			?>
 			<div class="article">
-				<div class="opening2"><p id="judul">Borrows</p></div>
+				<div class="opening2"><p id="judul">Borrows</p>
+					<form class="pilihanCari" action="">
+						<input id="button2" name="iAdd" type="submit" value="ADD" class="cari">
+					</form>
+				</div>
 				<div class="main">
 					<table>
-						<tr><th>Book Title</th><th>Author</th><th>Borrow Date</th><th>Return Date</th><th>Overdue</th><th>Fine</th><th>-</th></tr>
+						<tr><th>Borrower</th><th>Book Title</th><th>Author</th><th>Borrow Date</th><th>Return Date</th><th>Overdue</th><th>Fine</th><th>-</th></tr>
 						<?php
 							$querypeminjaman = "CALL semuapeminjaman('ACTIVE','');";
 							
@@ -46,6 +62,7 @@
 									echo "<form action='' method='get'>";
 									
 									echo "<tr>";
+									echo "<td>" . $row['nama'] . "</td>";
 									echo "<td>" . $row['judulbuku'] . "</td>";
 									echo "<td>" . $row['namapengarang'] . "</td>";
 									echo "<td>" . $row['tglpeminjaman'] . "</td>";
@@ -68,6 +85,40 @@
 			</div>
 		</div>
 	</div>
+	
+	<!-- The Modal ini 1 browser-->
+	<div id="myModal" class="modal">
+
+		<!-- Modal content kotak yg pop up nya-->
+		<div class="modal2-content">
+			<fieldset>
+				<span onclick="document.getElementById('myModal').style.display='none'" class="close">&times;</span>
+				<span id="judulForm">New Borrow</span>
+				<form action="">
+					<div class="iForm"><input type="text" name="emailpeminjam" placeholder="Email peminjam..."></div>
+					<div class="iForm"><input type="text" name="idbukudipinjam" placeholder="ID buku dipinjam..."></div>
+					<div class="iForm"><p>Batas peminjaman:</p><input type="date" name="bataspeminjaman" placeholder="Tanggal wajib kembali..."></div>
+					<div class="tombol">
+						<div><input type="submit" value="REGISTER" class="iBForm" name="add"></div>
+					</div>
+				</form>
+			</fieldset>
+		</div>
+	</div>
+
+	<script>
+		var modal = document.getElementById('myModal');
+		function modalOn(){
+			modal.style.display = 'block';
+		}
+	</script>
+
 </body>
 
 </html>
+
+<?php
+	if(isset($_REQUEST['iAdd'])){
+		echo "<script>modalOn();</script>";
+	}
+?>

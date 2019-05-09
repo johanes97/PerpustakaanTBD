@@ -5,7 +5,7 @@
 	session_start();
 	$query = $conn->getQuery();
 	
-	if(isset($_REQUEST['add'])){ 
+	if(isset($_GET['add'])){ 
 		$email = $_GET['email'];
 		$nama = $_GET['nama']; 
 		$pass = $_GET['pass'];
@@ -16,7 +16,7 @@
 		
 		if($pass == $copass){
 			if($conn->executeQuery($querycek) != null){
-				if($email != "" || $nama != "" || $pass != "" || $copass != ""){
+				if($email != "" && $nama != "" && $pass != "" && $copass != ""){
 					$conn->executeNonQuery($querytambahadmin);
 				}
 			}
@@ -120,7 +120,7 @@
 </html>
 
 <?php
-	if(isset($_REQUEST['iAdd'])){
+	if(isset($_GET['iAdd'])){
 		echo "<script>modalOn();</script>";
 	}
 ?>
