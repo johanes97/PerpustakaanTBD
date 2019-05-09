@@ -1,23 +1,5 @@
 <!DOCTYPE html>
 
-<?php
-	include ('OpenConnection.php');
-	session_start();
-	$query = $conn->getQuery();
-	
-	//Redirect jika telah login
-	if(isset($_SESSION['email'])){
-		$tipepengguna = $_SESSION['tipe'];
-		
-		if($tipepengguna == "user_biasa"){
-			header("Location: pages/user/usr.php");
-		}
-		else{
-			header("Location: pages/admin/adm.php");
-		}
-	}
-?>
-
 <html>
 
 <head>

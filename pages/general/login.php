@@ -2,8 +2,6 @@
 
 <?php  
 	include ('../../OpenConnection.php');
-	session_start();
-	$query = $conn->getQuery();
 ?>
 
 <html>
@@ -61,13 +59,13 @@
     if(isSet($_REQUEST['iLogin'])){
         $email = $_REQUEST['iEmail'];
 		$pass = $_REQUEST['iPass'];
-		$queryUser = "CALL login('$email','$pass');";
+		$queryUser = "call login('$email','$pass')";
 		$resultUser = $conn->executeQuery($queryUser);
 
 		if($email == "" || $pass == ""){
 			echo "<script>show()</script>";
 		}
-		else if($resultUser == null){
+		else if($resultUser==null ){
             echo "<script>show2()</script>";
 		}
 		else if($resultUser!=null){
@@ -78,18 +76,18 @@
 	            echo "<script>show3()</script>";
 			}
 			else{
+				session_start();
+				$_SESSION['email']=$email;
+
 				$nama = $resultUser[0]['nama'];
 				$tipe = $resultUser[0]['tipe'];
-				
-				$_SESSION['nama'] = $nama;
-				$_SESSION['tipe'] = $tipe;
-				$_SESSION['email'] = $email;
-				
+				$_SESSION['nama']=$nama;
+				$_SESSION['tipe']=$tipe;
 				if($tipe == "user_biasa"){
-					header("Location: ../user/usr.php");
+					header("Location: ../user/usr.php?email=$email ");
 				}
 				else{
-					header("Location: ../admin/adm.php");
+					header("Location: ../admin/adm.php?email=$email ");
 				}
 			}
 		}

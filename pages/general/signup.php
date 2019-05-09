@@ -2,8 +2,6 @@
 
 <?php
 	include ('../../OpenConnection.php'); 
-	session_start();
-	$query = $conn->getQuery();
 ?>
 
 <html>
@@ -67,9 +65,10 @@
 		$nama = $_REQUEST['iName'];
 		$pass = $_REQUEST['iPass']; 
 		$confirm = $_REQUEST['iCoPass'];
+		$tipe = "user_biasa";
 
-		$querySignUp ="CALL tambahanggota('$email','$nama','$pass','user_biasa')";
-		$queryCekEmail = "CALL login('$email','$pass')";
+		$querySignUp ="call sign_up('$email','$nama','$pass','$tipe')";
+		$queryCekEmail = "call login('$email','$pass')";
 
 		if($conn->executeQuery($queryCekEmail) != null){
 			echo "<p class='hint'>Email already used,</p>

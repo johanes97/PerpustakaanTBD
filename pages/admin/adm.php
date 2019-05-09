@@ -2,8 +2,6 @@
 
 <?php
 	include ('../../OpenConnection.php');
-	session_start();
-	$query = $conn->getQuery();
 ?>
 
 <html>
@@ -20,6 +18,7 @@
 <body>
 	<div class="isi">
 		<?php
+			session_start();
 			include('../../headerAdmin.php');
 		?>
 		<div class="middle">

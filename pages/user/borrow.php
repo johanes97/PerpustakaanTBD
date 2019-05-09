@@ -1,9 +1,7 @@
 <!DOCTYPE html>
 
 <?php
-	include ('../../OpenConnection.php');
-	session_start();
-	$query = $conn->getQuery();
+	include ('../../OpenConnection.php'); 
 ?>
 
 <html>
@@ -20,30 +18,44 @@
 <body>
 	<div class="isi">
 		<?php
+			session_start();
 			include ('../../header.php');
 		?>
 		<div class="middle">
 			<?php
 				include ('../../side.php');
+				$username=$_SESSION['username'];
+
+				$queryShowPeminjaman = "SELECT DISTINCT 
+											*,
+											IF(DATEDIFF(peminjaman.tgl_kembali,peminjaman.tgl_pinjam)-7<=0,0,
+												DATEDIFF(peminjaman.tgl_kembali,peminjaman.tgl_pinjam)-7) AS 'overdue', 
+											IF(DATEDIFF(peminjaman.tgl_kembali,peminjaman.tgl_pinjam)-7<=0,0,
+												(DATEDIFF(peminjaman.tgl_kembali,peminjaman.tgl_pinjam)-7)*5000) AS fine 
+										FROM 
+											buku inner join peminjaman 
+											on buku.id_buku = peminjaman.id_buku inner join anggota 
+											on peminjaman.username = anggota.username
+										WHERE peminjaman.username='$username'";
+				$query = $conn->getQuery();
 			?>
 			<div class="article">
-				<div class="opening2"><p id="judul">Borrows</p></div>
+				<div class="opening2"><p id="judul">Borrow</p></div>
 				<div class="main">
 					<table>
-						<tr><th>Book Title</th><th>Author</th><th>Borrow Date</th><th>Return Date</th><th>Overdue</th><th>Fine</th></tr>
+						<tr><th>Book Code</th><th>Book Title</th><th>Author</th><th>Borrow Date</th>
+						<th>Return Date</th><th>Overdue</th><th>Fine</th></tr>
 						<?php
-							$emaillogin = $_SESSION['email'];
-							$querypeminjaman = "CALL semuapeminjaman('ACTIVE','$emaillogin');";
-							
-							if($result = $query->query($querypeminjaman)){
+							if($result = $query->query($queryShowPeminjaman)){
 								while($row = $result->fetch_array()){
 									echo "<tr>";
-									echo "<td>" . $row['judulbuku'] . "</td>";
-									echo "<td>" . $row['namapengarang'] . "</td>";
-									echo "<td>" . $row['tglpeminjaman'] . "</td>";
-									echo "<td>" . $row['bataspengembalian'] . "</td>";
-									echo "<td>" . $row['durasihariterlambat'] . "</td>";
-									echo "<td>" . $row['besardenda'] . "</td>";
+									echo "<td>".$row['id_buku']."</td>";
+									echo "<td>".$row['judul']."</td>";
+									echo "<td>".$row['pengarang']."</td>";
+									echo "<td>".$row['tgl_pinjam']."</td>";
+									echo "<td>".$row['tgl_kembali']."</td>";
+									echo "<td>".$row['overdue']."</td>";
+									echo "<td>".$row['fine']."</td>";
 									echo "</tr>";
 								}
 							}

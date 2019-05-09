@@ -2,8 +2,6 @@
 
 <?php
 	include ('../../OpenConnection.php');
-	session_start();
-	$query = $conn->getQuery();
 ?>
 
 <html>
@@ -20,12 +18,8 @@
 <body>
 	<div class="isi">
 		<?php
-			if($_SESSION['tipe'] != 'user_biasa'){
-				include ('../../headerAdmin.php');
-			}
-			else{
-				include ('../../header.php');
-			}
+			session_start();
+			include ('../../headerAdmin.php');
 		?>
 		<div class="middle">
 			<?php
