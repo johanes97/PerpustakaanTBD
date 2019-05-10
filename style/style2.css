@@ -1,0 +1,163 @@
+@font-face {
+    font-family: fonts;
+    src: url(../fonts/Candara.ttf);
+}
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+body {
+    font-family: fonts;
+    background-color:#26364a;
+}
+img{
+    width: 100%;
+    opacity: 0.5;
+}
+.gambar{
+    box-shadow: 10px 10px 5px #26364a;
+}
+a{
+    text-decoration: none;
+    display: block;
+    padding: 10px;
+    color:#fff; 
+    text-align: center;
+    font-size: 30px;
+}
+.button{  
+    width: 130px;
+    float: left;
+    margin: 20px;
+    margin-top: 60px;
+}
+.bottom{
+    width: 100%;
+    height: 100%;
+    background-color:#b4c3d8;
+    position:fixed;
+}
+.nButton{
+    margin-top: 4%;
+    margin-left: 37%;
+}
+h1{
+    top: 25%;
+    left: 40%;
+    background-color: unset;
+    color: white;
+    font-size: 60px;
+    text-align: center;
+    position: fixed;
+}
+.judul{
+    top: 8%;
+}
+input{
+    padding: 9px;
+    width: 470px;
+}
+fieldset, form{
+    background-color:#d9e1ec;
+}
+fieldset{
+    width: 500px;
+    height: 500px;
+    margin-left: 34%;
+}
+#fLogin{
+    height: 220px;
+}
+.iForm{
+    padding: 7px;
+}
+.iBForm{
+    width: 100px;
+    float: left;
+    color: white;
+    background-color: black;
+}
+#judulForm{
+    display: inline-block;
+    margin-top: 15px;
+    margin-left: 6px;
+    font-size: 25px;
+}
+.tombol{
+    padding: 7px;
+}
+.topNav{
+    width: 100%;
+    height: 44px;
+    background-color: #f4f6f9;
+}
+.topNav li{
+    float: right;
+    list-style-type: none;
+    padding-left: 4px;
+    padding-right: 4px;
+}
+.topNav li a{
+    color: black;
+    font-size: 20px;
+}
+.topNav li a:hover{
+    color: white;
+    background-color: #4CAF50;
+}
+.sideNav{
+    width: 17%;
+    height: 100%;
+    background-color: white;
+    position: fixed;
+}
+.sideNav li a{
+    color: black;
+}
+.side{
+    text-align: left;
+    font-size: 20px;
+}
+#menu{
+    background-color: #456185;
+}
+#menu a{
+    color: white;
+}
+.sideNav, .article{
+    float:left;
+}
+.article{
+    margin-left: 17%;
+}
+#judul{
+    color: white;
+    background-color: #3d5676;
+    padding: 15px;
+    font-size: 30px;
+}
+.main{
+    color: white;
+    padding: 14px;
+    height: 100%;
+    overflow-y: scroll;
+}
+
+#about{
+    font-size: 28px;
+    padding-bottom: 10px;
+}
+.closing{
+    color: white;
+    bottom: 0;
+    position: fixed;
+    width: 100%;
+}
+.closing p{
+    padding: 10px;
+    background-color: #3d5676;
+}
+#list{
+    margin-left: 30px;
+}
