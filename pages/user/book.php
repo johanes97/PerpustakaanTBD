@@ -2,33 +2,15 @@
 
 <?php
 	include('../../OpenConnection.php');
-?>
-
-<?php
-	$queryShowBook="SELECT DISTINCT
-						*
-					FROM 
-						buku
-						inner join bukupengarang on buku.idbuku = bukupengarang.idbuku
-						inner join pengarang on pengarang.idpengarang = bukupengarang.idpengarang";
+	session_start();
 	$query = $conn->getQuery();
 
-	if(isset($_GET['iSearch'])){
-		$textInput = $_GET['textInput'];
-		$pilihan = $_GET['pilihan'];
-
-		$queryCari="";
-		if($pilihan == 'judul'){
-			$queryCari = " WHERE judulbuku LIKE '%$textInput%'";
-		}
-		else if($pilihan == 'pengarang'){
-			$queryCari = " WHERE namapengarang LIKE '%$textInput%'";	
-		}
-		else if($pilihan == 'tag'){
-			$queryCari = " WHERE namatag LIKE '%$textInput%'";
-		}
-		if($textInput == "") $queryCari="";
-		$queryShowBook .= $queryCari;
+	if(isSet($_GET['orderbutton'])){
+		$emailpemesan = $_SESSION['email'];
+		$idbukudipesan = $_GET['idbukudipesan'];
+		
+		$queryaddorder = "CALL tambahpemesanan('$emailpemesan',$idbukudipesan);";
+		$conn->executeNonQuery($queryaddorder);
 	}
 ?>
 
@@ -46,7 +28,6 @@
 <body>
 	<div class="isi">
 		<?php
-			session_start();
 			include ('../../header.php');
 		?>
 		<div class="middle">
@@ -54,29 +35,45 @@
 				include ('../../side.php');
 			?>
 			<div class="article">
-				<div class="opening2"><p id="judul">Book List</p>
-					<form class="pilihanCari" action="">
+				<div class="opening2"><p id="judul">Books</p>
+					<form class="pilihanCari" action="" method="get">
 						<input type="text" name="textInput" placeholder="Search books..." class="cari">
 						<span class="cari" id="by"><pre> by </pre></span>
 						<select name="pilihan" class="cari">
 							<option value="judul">Title</option>
-							<option value="tag">Tag</option>
 							<option value="pengarang">Author</option>
+							<option value="tag">Tag</option>
 						</select>
 						<input id="button" name="iSearch" type="submit" value="SEARCH" class="cari">
 					</form>
 				</div>
 				<div class="main">
 					<table>
-						<tr><th>Book ID</th><th>Book Title</th><th>Author</th></tr>
+						<tr><th>Book ID</th><th>Book Title</th><th>Author</th><th>Tag</th><th>-</th></tr>
 						<?php
-							if($result = $query->query($queryShowBook)){
+							$querybuku="CALL semuabuku()";
+
+							if(isset($_GET['iSearch'])){
+								$keyword = $_GET['textInput'];
+								$pilihanpencarian = $_GET['pilihan'];
+
+								$querybuku = "CALL caribuku('$pilihanpencarian','$keyword');";
+							}
+							
+							if($result = $query->query($querybuku)){
 								while($row = $result->fetch_array()){
+									echo "<form action='' method='get'>";
+									
 									echo "<tr>";
 									echo "<td>" . $row['idbuku'] . "</td>";
 									echo "<td>" . $row['judulbuku'] . "</td>";
 									echo "<td>" . $row['namapengarang'] . "</td>";
+									echo "<td>" . "</td>";
+									echo "<input name='idbukudipesan' type='hidden' value='" . $row['idbuku'] . "'>";
+									echo "<td><input name='orderbutton' type='submit' value='ORDER' class='iBForm'></td>";
 									echo "</tr>";
+									
+									echo "</form>";
 								}
 							}
 						?>
@@ -88,6 +85,7 @@
 			</div>
 		</div>
 	</div>
+
 </body>
 
 </html>

@@ -1,16 +1,16 @@
 -- Nama basis data: perpustakaantbd
 
 -- Buku
-insert into buku(judulbuku)
-values ('Algoritma dan Struktur Data');
-insert into buku(judulbuku)
-values ('Introduction to Algorithm');
-insert into buku(judulbuku)
-values ('Programming for Dummies');
-insert into buku(judulbuku)
-values ('Manage the Economy');
-insert into buku(judulbuku)
-values ('Network Security');
+insert into buku(judulbuku,deleted)
+values ('Algoritma dan Struktur Data',0);
+insert into buku(judulbuku,deleted)
+values ('Introduction to Algorithm',0);
+insert into buku(judulbuku,deleted)
+values ('Programming for Dummies',0);
+insert into buku(judulbuku,deleted)
+values ('Manage the Economy',0);
+insert into buku(judulbuku,deleted)
+values ('Network Security',0);
 
 -- Pengarang
 insert into pengarang(namapengarang)
@@ -87,16 +87,16 @@ insert into bukukata(idbuku, idkata, jmlkemunculan, bobot)
 values (5,5,1,0);
 
 -- Eksemplar
-insert into eksemplar(idbuku, status)
-values (1,0);
-insert into eksemplar(idbuku, status)
-values (2,0);
-insert into eksemplar(idbuku, status)
-values (3,0);
-insert into eksemplar(idbuku, status)
-values (4,1);
-insert into eksemplar(idbuku, status)
-values (5,1);
+insert into eksemplar(idbuku,status,deleted)
+values (1,0,0);
+insert into eksemplar(idbuku,status,deleted)
+values (2,0,0);
+insert into eksemplar(idbuku,status,deleted)
+values (3,0,0);
+insert into eksemplar(idbuku,status,deleted)
+values (4,1,0);
+insert into eksemplar(idbuku,status,deleted)
+values (5,1,0);
 
 -- Anggota
 insert into anggota(email,nama,sandi,tipe)
@@ -113,15 +113,15 @@ insert into denda(tipedenda,tarif)
 values (15,10000);
 
 -- Pemesanan
-insert into pemesanan(email,idbuku,tglpemesanan)
-values ('irwanSiKasep@gmail.com',1,'2019-12-25');
-insert into pemesanan(email,idbuku,tglpemesanan)
-values ('irwanSiKasep@gmail.com',2,'2018-12-25');
+insert into pemesanan(email,idbuku,tglpemesanan,statuspemesanan)
+values ('irwanSiKasep@gmail.com',1,'2019-12-25','WAITING');
+insert into pemesanan(email,idbuku,tglpemesanan,statuspemesanan)
+values ('irwanSiKasep@gmail.com',2,'2018-12-25','ACCEPTED');
 
 -- Peminjaman
-insert into peminjaman(email, ideksemplar, tglpeminjaman, tglpengembalian, bataspengembalian, durasihariterlambat, besardenda)
-values ('kasepSumasep@gmail.com',1,'2019-04-10','2019-04-17','2019-04-22', 5, 25000);
-insert into peminjaman(email, ideksemplar, tglpeminjaman, tglpengembalian, bataspengembalian, durasihariterlambat, besardenda)
-values ('irwanSiKasep@gmail.com',2,'2019-04-10','2019-04-17','2019-05-02', 15, 125000);
-insert into peminjaman(email, ideksemplar, tglpeminjaman, tglpengembalian, bataspengembalian, durasihariterlambat, besardenda)
-values ('alvinussutendy@gmail.com',3,'2019-04-10','2019-04-17','2019-04-22', 5, 25000);
+insert into peminjaman(email, ideksemplar, tglpeminjaman, tglpengembalian, bataspengembalian, durasihariterlambat, besardenda, statuspeminjaman)
+values ('kasepSumasep@gmail.com',1,'2019-04-10','2019-04-17','2019-04-22', 5, 25000, 'ACTIVE');
+insert into peminjaman(email, ideksemplar, tglpeminjaman, tglpengembalian, bataspengembalian, durasihariterlambat, besardenda, statuspeminjaman)
+values ('irwanSiKasep@gmail.com',2,'2019-04-10','2019-04-17','2019-05-02', 15, 125000, 'ACTIVE');
+insert into peminjaman(email, ideksemplar, tglpeminjaman, tglpengembalian, bataspengembalian, durasihariterlambat, besardenda, statuspeminjaman)
+values ('alvinussutendy@gmail.com',3,'2019-04-10','2019-04-17','2019-04-22', 5, 25000, 'ACTIVE');

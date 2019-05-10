@@ -2,21 +2,15 @@
 
 <?php
 	include ('../../OpenConnection.php'); 
-?>
-
-<?php
-	$email = $_SESSION['email'];
-	$queryShowPeminjaman = "SELECT
-								*
-							FROM 
-								buku
-								inner join pemesanan on buku.idbuku = pemesanan.idbuku
-								inner join anggota on pemesanan.email = anggota.email
-							WHERE
-								anggota.email LIKE '$email'
-							ORDER BY
-								tglpemesanan asc;";
+	session_start();
 	$query = $conn->getQuery();
+	
+	if(isSet($_GET['cancelbutton'])){
+		$idpemesanandihapus = $_GET['idpemesanandihapus'];
+		
+		$queryhapusorder = "CALL hapuspemesanan($idpemesanandihapus);";
+		$conn->executeNonQuery($queryhapusorder);
+	}
 ?>
 
 <html>
@@ -33,7 +27,6 @@
 <body>
 	<div class="isi">
 		<?php
-			session_start();
 			include ('../../header.php');
 		?>
 		<div class="middle">
@@ -41,21 +34,43 @@
 				include ('../../side.php');
 			?>
 			<div class="article">
-				<div class="opening2"><p id="judul">Order</p>
-					<form class="pilihanCari" action="">
-						<input id="button2" name="iAdd" type="submit" value="ADD ORDER" class="cari">
+				<div class="opening2"><p id="judul">Orders</p>
+					<form class="pilihanCari" action="" method="get">
+						<input type="text" name="textInput" placeholder="Search orders..." class="cari">
+						<span class="cari" id="by"><pre> by </pre></span>
+						<select name="pilihan" class="cari">
+							<option value="buku">Book</option>
+						</select>
+						<input id="button" name="iSearch" type="submit" value="SEARCH" class="cari">
 					</form>
 				</div>
 				<div class="main">
 					<table>
-						<tr><th>Book Title</th><th>Order Date</th>
+						<tr><th>Book Title</th><th>Order Date</th><th>-</th><tr>
 						<?php
-							if($result = $query->query($queryShowPeminjaman)){
+							$emaillogin = $_SESSION['email'];
+							$querypemesanan = "CALL semuapemesanan('WAITING','$emaillogin');";
+							
+							if(isset($_GET['iSearch'])){
+								$keyword = $_GET['textInput'];
+								$pilihanpencarian = $_GET['pilihan'];
+
+								$querypemesanan = "CALL caripemesanan('$pilihanpencarian','$keyword','WAITING','$emaillogin');";
+							}
+							
+							if($result = $query->query($querypemesanan)){
 								while($row = $result->fetch_array()){
+									echo "<form action='' method='get'>";
+									
 									echo "<tr>";
 									echo "<td>" . $row['judulbuku'] . "</td>";
 									echo "<td>" . $row['tglpemesanan'] . "</td>";
+									echo "<td>" . $row['statuspemesanan'] . "</td>";
+									echo "<input name='idpemesanandihapus' type='hidden' value='" . $row['idpemesanan'] . "'>";
+									echo "<td><input name='cancelbutton' type='submit' value='CANCEL' class='iBForm'></td>";
 									echo "</tr>";
+									
+									echo "</form>";
 								}
 							}
 						?>
@@ -68,76 +83,6 @@
 		</div>
 	</div>
 	
-	<!-- The Modal ini 1 browser-->
-	<div id="myModal" class="modal">
-
-		<!-- Modal content kotak yg pop up nya-->
-		<div class="modal2-content">
-			<fieldset>
-				<span onclick="document.getElementById('myModal').style.display='none'" class="close">&times;</span>
-				<span id="judulForm">Order Info</span>
-				<form method="get">
-					<div class="iForm"><input type="text" name="judul" placeholder="Title"></div>
-					<div class="iForm"><input type="text" name="pengarang" placeholder="Author"></div>
-					<div class="tombol">
-						<div><input type="submit" value="ADD" class="iBForm" name="add"></div>
-					</div>
-				</form>
-			</fieldset>
-		</div>
-
-	</div>
-
-	<script>
-		var modal = document.getElementById('myModal');
-		function modalOn(){
-			modal.style.display = 'block';
-		}
-	</script>
-	
 </body>
 
 </html>
-
-<?php
-	if(isset($_GET['iAdd'])){
-		echo "<script>modalOn();</script>";
-	}
-	if(isset($_GET['add'])){ 
-		$judulbuku = $_GET['judul'];
-		$namapengarang = $_GET['pengarang'];
-		//$tag = $_GET['kategori'];
-
-		if($judulbuku!="" && $namapengarang!=""){
-			$queryInsertBook = "INSERT INTO buku(judulbuku) VALUES('$judulbuku');";
-			$queryInsertPengarang = "INSERT INTO pengarang(namapengarang) VALUES('$namapengarang');";
-			$conn->executeNonQuery($queryInsertBook);
-			$conn->executeNonQuery($queryInsertPengarang);
-			
-			$queryGetIdBuku = "SELECT buku.idbuku
-								FROM buku
-								WHERE judulbuku LIKE '$judulbuku'";
-			$queryGetIdPengarang = "SELECT pengarang.idpengarang
-								FROM pengarang
-								WHERE namapengarang LIKE '$namapengarang'";
-			
-			$result = $query->query($queryGetIdBuku);
-			$row = $result->fetch_array();
-			$idbuku = $row['idbuku'];
-			
-			$result = $query->query($queryGetIdPengarang);
-			$row = $result->fetch_array();
-			$idpengarang = $row['idpengarang'];
-			
-			$queryInsertBukuPengarang = "INSERT INTO bukupengarang(idbuku,idpengarang) VALUES($idbuku,$idpengarang);";
-			$conn->executeNonQuery($queryInsertBukuPengarang);
-
-			//$idKate = $conn->executeQuery("SELECT id_kategori FROM kategori WHERE nama_kategori = '$kategori'")[0][0];
-			//$queryInsertKategori = "INSERT INTO kategori_buku 
-			//		VALUES ('$idBuku','$idKate')";
-			//$conn->executeNonQuery($queryInsertKategori); 
-
-			echo "<script>document.getElementById('tambahBuku').innerHTML = 'Book Added'</script>";
-		}
-	}
-?>

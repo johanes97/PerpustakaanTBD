@@ -60,3 +60,5 @@ class MySQLDB{
 
 $conn = new MySQLDB();
 $conn -> openConnection();
+
+?>
