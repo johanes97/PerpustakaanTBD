@@ -34,7 +34,7 @@
 				include ('../../sideAdmin.php');
 			?>
 			<div class="article">
-				<div class="opening2"><p id="judul">Orders</p></div>
+				<div class="opening2"><p id="judul">Orders</p>
 					<form class="pilihanCari" action="" method="get">
 						<input type="text" name="textInput" placeholder="Search orders..." class="cari">
 						<span class="cari" id="by"><pre> by </pre></span>
@@ -44,9 +44,10 @@
 						</select>
 						<input id="button" name="iSearch" type="submit" value="SEARCH" class="cari">
 					</form>
+				</div>
 				<div class="main">
 					<table>
-						<tr><th>Book Title</th><th>Member</th><th>Order Date</th><th>-</th>
+						<tr><th>Book Title</th><th>Member</th><th>Order Date</th><th>-</th></tr>
 						<?php										
 							$querypemesanan = "CALL semuapemesanan('WAITING','');";
 							

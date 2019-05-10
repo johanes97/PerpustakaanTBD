@@ -13,6 +13,8 @@
 		<li><a href="../admin/orders.php" class="side">Orders</a></li>
         <hr>
 		<li><a href="../admin/borrows.php" class="side">Borrows</a></li>
+		<hr>
+		<li><a href="../admin/fines.php" class="side">Fines</a></li>
         <hr>
         <li><a href="../general/journals.php" class="side">Journals Download</a></li>
         <hr>

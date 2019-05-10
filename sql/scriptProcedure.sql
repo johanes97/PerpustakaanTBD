@@ -1,10 +1,6 @@
 --SEMUA DELIMITER //
 
 
-
-
-
-
 --BUKU
 
 --BUKU: Mendapatkan daftar seluruh buku beserta pengarang, tag, kata, dan jumlah eksemplar (book.php books.php)(BELUM SELESAI)(BAGIAN TAG MASIH SALAH)
@@ -229,18 +225,20 @@ BEGIN
 	end if;
 END //
 
---PEMINJAMAN: Menghitung denda (prosedur-semuapeminjaman)
+--PEMINJAMAN: Menghitung denda (borrows.php)(TESTED)
 CREATE DEFINER=`root`@`localhost` PROCEDURE `updatepeminjaman`()
 BEGIN
+	declare vrbidpeminjaman int;
+	declare vrbbataspengembalian date;
+	declare dateinterval int;
+	
+	declare flagfinished int default 0;
+	
 	declare cursorpeminjaman cursor for
 	select peminjaman.idpeminjaman, peminjaman.bataspengembalian
 	from peminjaman;
 	
-	declare flagfinished int default 0;
 	declare continue handler for not found set flagfinished = 1;
-	
-	declare vrbidpeminjaman int;
-	declare vrbbataspengembalian date;
 	
 	open cursorpeminjaman;
 	
@@ -252,8 +250,7 @@ BEGIN
 			if (flagfinished = 1) then
 				leave get_variabel;
 			end if;
-	
-			declare dateinterval int;
+			
 			set dateinterval = datediff(vrbbataspengembalian,curdate());
 			
 			if (dateinterval < 0) then
@@ -282,7 +279,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `caripeminjaman`(
 BEGIN
 	set keyword = concat('%',keyword,'%');
 
-	if (pilihanpencarian like '') then
+	if (pilihanpencarian like 'buku') then
 	
 		select *
 		from peminjaman
@@ -291,10 +288,10 @@ BEGIN
 			inner join buku on buku.idbuku = eksemplar.idbuku
 			inner join bukupengarang on bukupengarang.idbuku = buku.idbuku
 			inner join pengarang on pengarang.idpengarang = bukupengarang.idpengarang
-		where peminjaman.email like emaillogin && peminjaman.statuspeminjaman like statusdicari
+		where buku.judulbuku like keyword && peminjaman.statuspeminjaman like statusdicari
 		order by peminjaman.bataspengembalian asc;
 	
-	elseif (pilihanpencarian like '') then
+	elseif (pilihanpencarian like 'anggota') then
 	
 		select *
 		from peminjaman
@@ -303,7 +300,7 @@ BEGIN
 			inner join buku on buku.idbuku = eksemplar.idbuku
 			inner join bukupengarang on bukupengarang.idbuku = buku.idbuku
 			inner join pengarang on pengarang.idpengarang = bukupengarang.idpengarang
-		where peminjaman.statuspeminjaman like statusdicari
+		where anggota.nama like keyword && peminjaman.statuspeminjaman like statusdicari
 		order by peminjaman.bataspengembalian asc;
 	
 	end if;
@@ -447,9 +444,44 @@ END //
 
 
 
--- Procedure untuk menambah eksemplar
 
--- Procedure untuk menambah denda
+
+
+
+--DENDA (SELESAI)
+
+--DENDA: Mendapatkan semua tipe denda (fines.php)(TESTED)
+CREATE DEFINER=`root`@`localhost` PROCEDURE `semuadenda`()
+BEGIN		
+	select *
+	from denda;
+END //
+
+--DENDA: Menambahkan tipe denda (fines.php)(TESTED)
+CREATE DEFINER=`root`@`localhost` PROCEDURE `tambahdenda`(
+	IN intipedenda int,
+	IN intarif int
+)
+BEGIN		
+	insert into denda(tipedenda,tarif)
+	values (intipedenda,intarif);
+END //
+
+--DENDA: Menghapus tipe denda berdasarkan tipedenda (fines.php)(TESTED)
+CREATE DEFINER=`root`@`localhost` PROCEDURE `hapusdenda`(
+	IN tipedendadihapus int
+)
+BEGIN
+	delete from denda
+	where denda.tipedenda = tipedendadihapus;
+END //
+
+
+
+
+
+
+-- Procedure untuk menambah eksemplar
 
 -- Procedure untuk mencari nilai IDF setiap kata
 

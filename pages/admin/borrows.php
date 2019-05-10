@@ -47,7 +47,14 @@
 			?>
 			<div class="article">
 				<div class="opening2"><p id="judul">Borrows</p>
-					<form class="pilihanCari" action="">
+					<form class="pilihanCari" action="" method="get">
+						<input type="text" name="textInput" placeholder="Search borrows..." class="cari">
+						<span class="cari" id="by"><pre> by </pre></span>
+						<select name="pilihan" class="cari">
+							<option value="anggota">Member</option>
+							<option value="buku">Book</option>
+						</select>
+						<input id="button" name="iSearch" type="submit" value="SEARCH" class="cari">
 						<input id="button2" name="iAdd" type="submit" value="ADD" class="cari">
 					</form>
 				</div>
@@ -55,7 +62,17 @@
 					<table>
 						<tr><th>Borrower</th><th>Book Title</th><th>Author</th><th>Borrow Date</th><th>Return Date</th><th>Overdue</th><th>Fine</th><th>-</th></tr>
 						<?php
+							$queryupdatepeminjaman = "CALL updatepeminjaman();";
+							$conn->executeNonQuery($queryupdatepeminjaman);
+							
 							$querypeminjaman = "CALL semuapeminjaman('ACTIVE','');";
+							
+							if(isset($_GET['iSearch'])){
+								$keyword = $_GET['textInput'];
+								$pilihanpencarian = $_GET['pilihan'];
+
+								$querypeminjaman = "CALL caripeminjaman('$pilihanpencarian','$keyword','ACTIVE');";
+							}
 							
 							if($result = $query->query($querypeminjaman)){
 								while($row = $result->fetch_array()){
