@@ -499,8 +499,4 @@ END //
 
 --Procedure untuk mencari rekomendasi buku untuk member
 
--- Procedure untuk melakukan peminjaman buku dengan judul buku dan eksemplar tertentu.
-
 -- Procedure untuk mengingatkan pengembalian buku
-
--- Procedure menu feedback
