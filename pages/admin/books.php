@@ -98,7 +98,7 @@
 			<fieldset>
 				<span onclick="document.getElementById('myModal').style.display='none'" class="close">&times;</span>
 				<span id="judulForm">Book Data</span>
-				<form method="get">
+				<form method="get" action="books.php">
 					<div class="iForm"><input type="text" name="judul" placeholder="Title"></div>
 					<div class="iForm">
 						<input list="pengarangs" id="optionPengarang">
@@ -205,18 +205,18 @@
 		$tag = $_GET['tag'];
 
 		if($judulbuku!="" && $namapengarang!="" && $tag!=""){
+			// echo "<script>console.log('masuk')</script>";
 			$conn->freeResult();
 			// $queryInsertBuku = "call insert_book('$judulbuku')";
 			// $conn->executeNonQuery($queryInsertBuku);
 			// $conn->freeResult();
-			$queryInsertBukuPengarangTag = "call insert_book_author_tag('$judulbuku','$namapengarang','$tag')";
+			$queryInsertBukuPengarangTag = "call insert_book_author_tag_word('$judulbuku','$namapengarang','$tag')";
 			$conn->executeNonQuery($queryInsertBukuPengarangTag);
 
 			//$idKate = $conn->executeQuery("SELECT id_kategori FROM kategori WHERE nama_kategori = '$kategori'")[0][0];
 			//$queryInsertKategori = "INSERT INTO kategori_buku 
 			//		VALUES ('$idBuku','$idKate')";
 			//$conn->executeNonQuery($queryInsertKategori); 
-
 			echo "<script>document.getElementById('tambahBuku').innerHTML = 'Book Added'</script>";
 		}
 	}
