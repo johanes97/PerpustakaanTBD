@@ -21,7 +21,7 @@
 <html>
 
 <head>
-	<title>eLibrary</title>
+	<title>JFA Library</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<!-- OPTIONAL -->
 	<link rel="stylesheet" href="style/style.css">
@@ -31,7 +31,7 @@
 	<div class="isi">
 		<div class="top">
 			<img src="img/banner.jpg" alt="banner">
-			<h1 id="library">eLIBRARY</h1>
+			<h1 id="library">JFA Library</h1>
 		</div>
 		<div class="bottom">
 			<div class="nButton">

@@ -158,10 +158,12 @@ insert into anggota(email,nama,sandi,tipe)
 values ('firmansandyp@gmail.com','firmansandyp','tetetoet','user_biasa');
 
 -- Denda
-insert into denda(tipedenda,tarif)
-values (5,5000);
-insert into denda(tipedenda,tarif)
-values (15,10000);
+insert into denda(tarif,jumlahhari)
+values (5000,5);
+insert into denda(tarif,jumlahhari)
+values (7500,5);
+insert into denda(tarif,jumlahhari)
+values (10000,3);
 
 -- Pemesanan
 insert into pemesanan(email,idbuku,tglpemesanan,statuspemesanan)

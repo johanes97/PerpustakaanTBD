@@ -2,7 +2,7 @@
 
 <div class="top">
     <img src="../../img/banner2.jpg" alt="banner" class="gambar">
-    <h1 class="judul">eLIBRARY</h1>
+    <h1 class="judul">JFA Library</h1>
 </div>
 
 <div class="topNav">

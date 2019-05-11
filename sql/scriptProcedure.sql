@@ -71,7 +71,7 @@ BEGIN
 	where buku.idbuku = idbukudihapus;
 END //
 
---BUKU: Mendapatkan rekomendasi buku untuk anggota yang login (recommendation.php)(TESTED) 
+--BUKU: Mendapatkan rekomendasi buku untuk anggota yang login (recommendation.php)
 CREATE DEFINER=`root`@`localhost` PROCEDURE `rekomendasibuku`(
 	IN emaillogin varchar(100)
 )
@@ -81,16 +81,15 @@ BEGIN
 	create temporary table tmpjumlahpeminjamantag as
 		select tag.idtag, tag.namatag, count(tag.idtag) as 'tagcount'
 		from peminjaman
-			inner join anggota on anggota.email = peminjaman.email
 			inner join eksemplar on eksemplar.ideksemplar = peminjaman.ideksemplar
 			inner join buku on buku.idbuku = eksemplar.idbuku
 			inner join bukutag on bukutag.idbuku = buku.idbuku
 			inner join tag on tag.idtag = bukutag.idtag
-		where anggota.email like emaillogin
+		where peminjaman.email like emaillogin
 		group by tag.idtag
 		order by tagcount desc;
 
-	--cari semua buku dan urutkan berdasarkan book value (book value = total value dari tag-tag yang dimiliki buku)
+	--cari semua buku dan urutkan berdasarkan book value (book value = total value dari tag-tag yang dimiliki buku)(SUDAH BENAR)
 	drop temporary table if exists tmpvaluebuku;
 	create temporary table tmpvaluebuku as
 		select buku.idbuku, buku.judulbuku, sum(tagcount) as 'bookvalue'
@@ -105,10 +104,10 @@ BEGIN
 	create temporary table tmpvaluebuku2 as
 		select tmpvaluebuku.idbuku, tmpvaluebuku.judulbuku, tmpvaluebuku.bookvalue
 		from peminjaman
-			inner join anggota on anggota.email = peminjaman.email
 			inner join eksemplar on eksemplar.ideksemplar = peminjaman.ideksemplar
 			right outer join tmpvaluebuku on tmpvaluebuku.idbuku = eksemplar.idbuku
-		where anggota.email like emaillogin and (peminjaman.statuspeminjaman like 'INACTIVE' or peminjaman.idpeminjaman is null)
+		where peminjaman.email like emaillogin and (peminjaman.statuspeminjaman like 'INACTIVE' or peminjaman.statuspeminjaman is null)
+		group by tmpvaluebuku.idbuku
 		order by bookvalue desc;
 	
 	--menambahkan nama pengarang
@@ -284,11 +283,20 @@ END //
 --PEMINJAMAN: Mengupdate hari terlambat dan besar denda (borrows.php)(TESTED)
 CREATE DEFINER=`root`@`localhost` PROCEDURE `updatepeminjaman`()
 BEGIN
-	declare vrbidpeminjaman int;
+	declare newdurasihariterlambat int default 0;
+	declare newbesardenda int default 0;
+	
+	declare dateinterval int default 0;
+	
+	declare vrbidpeminjaman int default 0;
 	declare vrbbataspengembalian date;
-	declare dateinterval int;
+	
+	declare vrbtarif int default 0;
+	declare vrbjumlahhari int default 0;
+	
 	
 	declare flagfinished int default 0;
+	declare flagfinished2 int default 0;
 	
 	declare cursorpeminjaman cursor for
 	select peminjaman.idpeminjaman, peminjaman.bataspengembalian
@@ -297,7 +305,6 @@ BEGIN
 	declare continue handler for not found set flagfinished = 1;
 	
 	open cursorpeminjaman;
-	
 		get_variabel: loop
 			
 			fetch cursorpeminjaman
@@ -310,19 +317,61 @@ BEGIN
 			set dateinterval = datediff(vrbbataspengembalian,curdate());
 			
 			if (dateinterval < 0) then
-	
+				
+				set dateinterval = abs(dateinterval);
+				set newdurasihariterlambat = abs(dateinterval);
+
 				update peminjaman
-				set peminjaman.durasihariterlambat = abs(dateinterval)
+				set peminjaman.durasihariterlambat = newdurasihariterlambat
 				where peminjaman.idpeminjaman = vrbidpeminjaman;
 				
+				
+				BLOCK2: BEGIN
+				
+				declare cursordenda cursor for
+				select denda.tarif, denda.jumlahhari
+				from denda
+				order by denda.tarif asc;
+				
+				declare continue handler for not found set flagfinished2 = 1;
+				
+				open cursordenda;
+					get_variabel2: loop
+					
+						fetch cursordenda
+						into vrbtarif, vrbjumlahhari;
+					
+						if (flagfinished2 = 1) then
+							leave get_variabel2;
+						end if;
+						
+						if ((dateinterval-vrbjumlahhari) <= 0) then
+							set newbesardenda = newbesardenda + (dateinterval*vrbtarif);
+							leave get_variabel2;
+						else
+							set dateinterval = dateinterval - vrbjumlahhari;
+							set newbesardenda = newbesardenda + (vrbjumlahhari*vrbtarif);
+						end if;
+					
+					end loop get_variabel2;
+				close cursordenda;
+				
+				END BLOCK2;
+				
 				update peminjaman
-				set peminjaman.besardenda = 1000*abs(dateinterval)
+				set peminjaman.besardenda = newbesardenda
 				where peminjaman.idpeminjaman = vrbidpeminjaman;
 				
 			end if;
+			
+			set newbesardenda = 0;
+			set newdurasihariterlambat = 0;
+			set dateinterval = 0;
+			
+			set flagfinished=0;
+			set flagfinished2=0;
 	
 		end loop get_variabel;
-	
 	close cursorpeminjaman;
 END //
 
@@ -530,21 +579,21 @@ END //
 
 --DENDA: Menambahkan tipe denda (fines.php)(TESTED)
 CREATE DEFINER=`root`@`localhost` PROCEDURE `tambahdenda`(
-	IN intipedenda int,
-	IN intarif int
+	IN intarif int,
+	IN injumlahhari int
 )
 BEGIN		
-	insert into denda(tipedenda,tarif)
-	values (intipedenda,intarif);
+	insert into denda(tarif,jumlahhari)
+	values (intarif,injumlahhari);
 END //
 
 --DENDA: Menghapus tipe denda berdasarkan tipedenda (fines.php)(TESTED)
 CREATE DEFINER=`root`@`localhost` PROCEDURE `hapusdenda`(
-	IN tipedendadihapus int
+	IN tarifhapusdenda int
 )
 BEGIN
 	delete from denda
-	where denda.tipedenda = tipedendadihapus;
+	where denda.tarif = tarifhapusdenda;
 END //
 
 

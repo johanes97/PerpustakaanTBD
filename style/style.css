@@ -121,8 +121,9 @@ fieldset, form{
     font-size: 20px;
 }
 .topNav li a:hover{
-    color: white;
-    background-color: #4CAF50;
+    color: black;
+    background-color: yellow;
+	/*#4CAF50*/
 }
 .topNav p{
     padding: 15px;
@@ -138,8 +139,8 @@ fieldset, form{
     color: black;
 }
 .sideNav a:hover{
-    color: white;
-    background-color:green;
+    color: black;
+    background-color:yellow;
 }
 .side{
     text-align: left;
