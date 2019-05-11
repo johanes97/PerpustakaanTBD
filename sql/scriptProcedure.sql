@@ -71,6 +71,52 @@ BEGIN
 	where buku.idbuku = idbukudihapus;
 END //
 
+--BUKU: Mendapatkan rekomendasi buku untuk anggota yang login (recommendation.php)
+CREATE DEFINER=`root`@`localhost` PROCEDURE `rekomendasibuku`(
+	IN emaillogin varchar(100)
+)
+BEGIN
+	--cari total peminjaman setiap tag dari setiap buku yang pernah seorang anggota pinjam (value setiap tag)(SUDAH BENAR)
+	drop temporary table if exists tmpjumlahpeminjamantag;
+	create temporary table tmpjumlahpeminjamantag as
+		select tag.idtag, tag.namatag, count(tag.idtag) as 'tagcount'
+		from peminjaman
+			inner join eksemplar on eksemplar.ideksemplar = peminjaman.ideksemplar
+			inner join buku on buku.idbuku = eksemplar.idbuku
+			inner join bukutag on bukutag.idbuku = buku.idbuku
+			inner join tag on tag.idtag = bukutag.idtag
+		where peminjaman.email like emaillogin
+		group by tag.idtag
+		order by tagcount desc;
+
+	--cari semua buku dan urutkan berdasarkan book value (book value = total value dari tag-tag yang dimiliki buku)(SUDAH BENAR)
+	drop temporary table if exists tmpvaluebuku;
+	create temporary table tmpvaluebuku as
+		select buku.idbuku, buku.judulbuku, sum(tagcount) as 'bookvalue'
+		from buku
+			inner join bukutag on bukutag.idbuku = buku.idbuku
+			inner join tmpjumlahpeminjamantag on tmpjumlahpeminjamantag.idtag = bukutag.idtag
+		group by buku.idbuku
+		order by bookvalue desc;
+	
+	--hapus buku yang sedang dipinjam
+	drop temporary table if exists tmpvaluebuku2;
+	create temporary table tmpvaluebuku2 as
+		select tmpvaluebuku.idbuku, tmpvaluebuku.judulbuku, tmpvaluebuku.bookvalue
+		from peminjaman
+			inner join eksemplar on eksemplar.ideksemplar = peminjaman.ideksemplar
+			right outer join tmpvaluebuku on tmpvaluebuku.idbuku = eksemplar.idbuku
+		where peminjaman.email like emaillogin and (peminjaman.statuspeminjaman like 'INACTIVE' or peminjaman.statuspeminjaman is null)
+		group by tmpvaluebuku.idbuku
+		order by bookvalue desc;
+	
+	--menambahkan nama pengarang
+	select tmpvaluebuku2.idbuku, tmpvaluebuku2.judulbuku, pengarang.namapengarang, tmpvaluebuku2.bookvalue
+	from tmpvaluebuku2
+		inner join bukupengarang on bukupengarang.idbuku = tmpvaluebuku2.idbuku
+		inner join pengarang on pengarang.idpengarang = bukupengarang.idpengarang
+	order by bookvalue desc;
+END //
 
 
 
@@ -234,14 +280,23 @@ BEGIN
 	end if;
 END //
 
---PEMINJAMAN: Menghitung denda (borrows.php)(TESTED)
+--PEMINJAMAN: Mengupdate hari terlambat dan besar denda (borrows.php)(TESTED)
 CREATE DEFINER=`root`@`localhost` PROCEDURE `updatepeminjaman`()
 BEGIN
-	declare vrbidpeminjaman int;
+	declare newdurasihariterlambat int default 0;
+	declare newbesardenda int default 0;
+	
+	declare dateinterval int default 0;
+	
+	declare vrbidpeminjaman int default 0;
 	declare vrbbataspengembalian date;
-	declare dateinterval int;
+	
+	declare vrbtarif int default 0;
+	declare vrbjumlahhari int default 0;
+	
 	
 	declare flagfinished int default 0;
+	declare flagfinished2 int default 0;
 	
 	declare cursorpeminjaman cursor for
 	select peminjaman.idpeminjaman, peminjaman.bataspengembalian
@@ -250,7 +305,6 @@ BEGIN
 	declare continue handler for not found set flagfinished = 1;
 	
 	open cursorpeminjaman;
-	
 		get_variabel: loop
 			
 			fetch cursorpeminjaman
@@ -263,23 +317,65 @@ BEGIN
 			set dateinterval = datediff(vrbbataspengembalian,curdate());
 			
 			if (dateinterval < 0) then
-	
+				
+				set dateinterval = abs(dateinterval);
+				set newdurasihariterlambat = abs(dateinterval);
+
 				update peminjaman
-				set peminjaman.durasihariterlambat = abs(dateinterval)
+				set peminjaman.durasihariterlambat = newdurasihariterlambat
 				where peminjaman.idpeminjaman = vrbidpeminjaman;
 				
+				
+				BLOCK2: BEGIN
+				
+				declare cursordenda cursor for
+				select denda.tarif, denda.jumlahhari
+				from denda
+				order by denda.tarif asc;
+				
+				declare continue handler for not found set flagfinished2 = 1;
+				
+				open cursordenda;
+					get_variabel2: loop
+					
+						fetch cursordenda
+						into vrbtarif, vrbjumlahhari;
+					
+						if (flagfinished2 = 1) then
+							leave get_variabel2;
+						end if;
+						
+						if ((dateinterval-vrbjumlahhari) <= 0) then
+							set newbesardenda = newbesardenda + (dateinterval*vrbtarif);
+							leave get_variabel2;
+						else
+							set dateinterval = dateinterval - vrbjumlahhari;
+							set newbesardenda = newbesardenda + (vrbjumlahhari*vrbtarif);
+						end if;
+					
+					end loop get_variabel2;
+				close cursordenda;
+				
+				END BLOCK2;
+				
 				update peminjaman
-				set peminjaman.besardenda = 1000*abs(dateinterval)
+				set peminjaman.besardenda = newbesardenda
 				where peminjaman.idpeminjaman = vrbidpeminjaman;
 				
 			end if;
+			
+			set newbesardenda = 0;
+			set newdurasihariterlambat = 0;
+			set dateinterval = 0;
+			
+			set flagfinished=0;
+			set flagfinished2=0;
 	
 		end loop get_variabel;
-	
 	close cursorpeminjaman;
 END //
 
---PEMINJAMAN: Mencari seluruh peminjaman (borrows.php)
+--PEMINJAMAN: Mencari seluruh peminjaman (borrows.php)(TESTED)
 CREATE DEFINER=`root`@`localhost` PROCEDURE `caripeminjaman`(
 	IN pilihanpencarian varchar(100),
 	IN keyword varchar(100),
@@ -297,7 +393,7 @@ BEGIN
 			inner join buku on buku.idbuku = eksemplar.idbuku
 			inner join bukupengarang on bukupengarang.idbuku = buku.idbuku
 			inner join pengarang on pengarang.idpengarang = bukupengarang.idpengarang
-		where buku.judulbuku like keyword && peminjaman.statuspeminjaman like statusdicari
+		where buku.judulbuku like keyword and peminjaman.statuspeminjaman like statusdicari
 		order by peminjaman.bataspengembalian asc;
 	
 	elseif (pilihanpencarian like 'anggota') then
@@ -309,7 +405,7 @@ BEGIN
 			inner join buku on buku.idbuku = eksemplar.idbuku
 			inner join bukupengarang on bukupengarang.idbuku = buku.idbuku
 			inner join pengarang on pengarang.idpengarang = bukupengarang.idpengarang
-		where anggota.nama like keyword && peminjaman.statuspeminjaman like statusdicari
+		where anggota.nama like keyword and peminjaman.statuspeminjaman like statusdicari
 		order by peminjaman.bataspengembalian asc;
 	
 	end if;
@@ -327,11 +423,15 @@ BEGIN
 	select eksemplar.ideksemplar
 	into ideksemplardipinjam
 	from eksemplar
-		inner join buku on buku.idbuku = eksemplar.idbuku
-	where buku.idbuku = idbukudipinjam;
+	where eksemplar.idbuku = idbukudipinjam and eksemplar.status = 0
+	limit 1;
 	
 	insert into peminjaman(email,ideksemplar,tglpeminjaman,bataspengembalian,durasihariterlambat,besardenda,statuspeminjaman)
 	values (emailpeminjam,ideksemplardipinjam,now(),bataspeminjaman,0,0,'ACTIVE');
+	
+	update eksemplar
+	set eksemplar.status = 1
+	where eksemplar.ideksemplar = ideksemplardipinjam;
 END //
 
 --PEMINJAMAN: Menghapus peminjaman (borrows.php)(TESTED)
@@ -339,6 +439,8 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `hapuspeminjaman`(
 	IN idpeminjamandihapus int
 )
 BEGIN
+	declare ideksemplarkembali int;
+	
 	update peminjaman
 	set peminjaman.statuspeminjaman = 'INACTIVE'
 	where peminjaman.idpeminjaman = idpeminjamandihapus;
@@ -346,6 +448,15 @@ BEGIN
 	update peminjaman
 	set peminjaman.tglpengembalian = now()
 	where peminjaman.idpeminjaman = idpeminjamandihapus;
+	
+	select peminjaman.ideksemplar
+	into ideksemplarkembali
+	from peminjaman
+	where peminjaman.idpeminjaman = idpeminjamandihapus;
+	
+	update eksemplar
+	set eksemplar.status = 0
+	where eksemplar.ideksemplar = ideksemplarkembali;
 END //
 
 
@@ -468,21 +579,21 @@ END //
 
 --DENDA: Menambahkan tipe denda (fines.php)(TESTED)
 CREATE DEFINER=`root`@`localhost` PROCEDURE `tambahdenda`(
-	IN intipedenda int,
-	IN intarif int
+	IN intarif int,
+	IN injumlahhari int
 )
 BEGIN		
-	insert into denda(tipedenda,tarif)
-	values (intipedenda,intarif);
+	insert into denda(tarif,jumlahhari)
+	values (intarif,injumlahhari);
 END //
 
 --DENDA: Menghapus tipe denda berdasarkan tipedenda (fines.php)(TESTED)
 CREATE DEFINER=`root`@`localhost` PROCEDURE `hapusdenda`(
-	IN tipedendadihapus int
+	IN tarifhapusdenda int
 )
 BEGIN
 	delete from denda
-	where denda.tipedenda = tipedendadihapus;
+	where denda.tarif = tarifhapusdenda;
 END //
 
 
@@ -491,6 +602,103 @@ END //
 
 
 
+
+
+
+
+--LAPORAN (SELESAI)
+
+--LAPORAN: Mendapatkan buku yang sering dipinjam, baik ssecara universal maupun khusus anggota yang login (report.php reports.php)(TESTED)
+CREATE DEFINER=`root`@`localhost` PROCEDURE `laporanbuku`(
+	IN emaillogin varchar(100)
+)
+BEGIN
+	if (emaillogin not like '') then
+
+		select buku.judulbuku as 'bukudipinjam', count(buku.idbuku) as 'jumlahpeminjaman'
+		from peminjaman
+			inner join anggota on anggota.email = peminjaman.email
+			inner join eksemplar on eksemplar.ideksemplar = peminjaman.ideksemplar
+			inner join buku on buku.idbuku = eksemplar.idbuku
+		where anggota.email like emaillogin
+		group by buku.judulbuku
+		order by jumlahpeminjaman desc;
+	
+	else
+
+		select buku.judulbuku as 'bukudipinjam', count(buku.idbuku) as 'jumlahpeminjaman'
+		from peminjaman
+			inner join eksemplar on eksemplar.ideksemplar = peminjaman.ideksemplar
+			inner join buku on buku.idbuku = eksemplar.idbuku
+		group by buku.judulbuku
+		order by jumlahpeminjaman desc;
+	
+	end if;
+END //
+
+--LAPORAN: Mendapatkan pengarang yang bukunya sering dipinjam, baik ssecara universal maupun khusus anggota yang login (report.php reports.php)(TESTED)
+CREATE DEFINER=`root`@`localhost` PROCEDURE `laporanpengarang`(
+	IN emaillogin varchar(100)
+)
+BEGIN
+	if (emaillogin not like '') then
+
+		select pengarang.namapengarang as 'pengarangdipinjam', count(pengarang.idpengarang) as 'jumlahpeminjaman'
+		from peminjaman
+			inner join anggota on anggota.email = peminjaman.email
+			inner join eksemplar on eksemplar.ideksemplar = peminjaman.ideksemplar
+			inner join buku on buku.idbuku = eksemplar.idbuku
+			inner join bukupengarang on bukupengarang.idbuku = buku.idbuku
+			inner join pengarang on pengarang.idpengarang = bukupengarang.idpengarang
+		where anggota.email like emaillogin
+		group by pengarang.namapengarang
+		order by jumlahpeminjaman desc;
+	
+	else
+	
+		select pengarang.namapengarang as 'pengarangdipinjam', count(pengarang.idpengarang) as 'jumlahpeminjaman'
+		from peminjaman
+			inner join eksemplar on eksemplar.ideksemplar = peminjaman.ideksemplar
+			inner join buku on buku.idbuku = eksemplar.idbuku
+			inner join bukupengarang on bukupengarang.idbuku = buku.idbuku
+			inner join pengarang on pengarang.idpengarang = bukupengarang.idpengarang
+		group by pengarang.namapengarang
+		order by jumlahpeminjaman desc;
+	
+	end if;
+END //
+
+--LAPORAN: Mendapatkan tag-tag yang sering dipinjam, baik ssecara universal maupun khusus anggota yang login (report.php reports.php)(TESTED)
+CREATE DEFINER=`root`@`localhost` PROCEDURE `laporantag`(
+	IN emaillogin varchar(100)
+)
+BEGIN
+	if (emaillogin not like '') then
+
+		select tag.namatag as 'tagdipinjam', count(tag.idtag) as 'jumlahpeminjaman'
+		from peminjaman
+			inner join anggota on anggota.email = peminjaman.email
+			inner join eksemplar on eksemplar.ideksemplar = peminjaman.ideksemplar
+			inner join buku on buku.idbuku = eksemplar.idbuku
+			inner join bukutag on bukutag.idbuku = buku.idbuku
+			inner join tag on tag.idtag = bukutag.idtag
+		where anggota.email like emaillogin
+		group by tag.namatag
+		order by jumlahpeminjaman desc;
+
+	else
+
+		select tag.namatag as 'tagdipinjam', count(tag.idtag) as 'jumlahpeminjaman'
+		from peminjaman
+			inner join eksemplar on eksemplar.ideksemplar = peminjaman.ideksemplar
+			inner join buku on buku.idbuku = eksemplar.idbuku
+			inner join bukutag on bukutag.idbuku = buku.idbuku
+			inner join tag on tag.idtag = bukutag.idtag
+		group by tag.namatag
+		order by jumlahpeminjaman desc;
+		
+	end if;
+END //
 
 
 
@@ -1046,6 +1254,7 @@ BEGIN
             set panjangVDok = sqrt(panjangVDok);
             set counterVDokumen = 1;
 
+
             iterator:
             LOOP
                 IF counterVDokumenQuery > (select count(kataDokumen) from queryDanDokumenTable) THEN
@@ -1077,16 +1286,110 @@ BEGIN
 END
 
 
--- Procedure untuk laporan buku-buku yang sering dipinjam
 
--- Procedure untuk laporan buku-buku yang sering dipinjam berdasarkan pengarang
 
--- Procedure untuk laporan tag-tag dari buku-buku yang sering dipinjam.
+--LAPORAN
 
--- Procedure untuk laporan tag-tag yang sering dipinjam oleh seorang anggota.
+--LAPORAN: Mendapatkan buku yang sering dipinjam, baik ssecara universal maupun khusus anggota yang login (report.php reports.php)(TESTED)
+CREATE DEFINER=`root`@`localhost` PROCEDURE `laporanbuku`(
+	IN emaillogin varchar(100)
+)
+BEGIN
+	if (emaillogin not like '') then
 
--- Procedure untuk laporan rekomendasi buku bagi seorang anggota.
+		select buku.judulbuku as 'bukudipinjam', count(buku.idbuku) as 'jumlahpeminjaman'
+		from peminjaman
+			inner join anggota on anggota.email = peminjaman.email
+			inner join eksemplar on eksemplar.ideksemplar = peminjaman.ideksemplar
+			inner join buku on buku.idbuku = eksemplar.idbuku
+		where anggota.email like emaillogin
+		group by buku.judulbuku
+		order by jumlahpeminjaman desc;
+	
+	else
 
---Procedure untuk mencari rekomendasi buku untuk member
+		select buku.judulbuku as 'bukudipinjam', count(buku.idbuku) as 'jumlahpeminjaman'
+		from peminjaman
+			inner join eksemplar on eksemplar.ideksemplar = peminjaman.ideksemplar
+			inner join buku on buku.idbuku = eksemplar.idbuku
+		group by buku.judulbuku
+		order by jumlahpeminjaman desc;
+	
+	end if;
+END //
 
--- Procedure untuk mengingatkan pengembalian buku
+--LAPORAN: Mendapatkan pengarang yang bukunya sering dipinjam, baik ssecara universal maupun khusus anggota yang login (report.php reports.php)(TESTED)
+CREATE DEFINER=`root`@`localhost` PROCEDURE `laporanpengarang`(
+	IN emaillogin varchar(100)
+)
+BEGIN
+	if (emaillogin not like '') then
+
+		select pengarang.namapengarang as 'pengarangdipinjam', count(pengarang.idpengarang) as 'jumlahpeminjaman'
+		from peminjaman
+			inner join anggota on anggota.email = peminjaman.email
+			inner join eksemplar on eksemplar.ideksemplar = peminjaman.ideksemplar
+			inner join buku on buku.idbuku = eksemplar.idbuku
+			inner join bukupengarang on bukupengarang.idbuku = buku.idbuku
+			inner join pengarang on pengarang.idpengarang = bukupengarang.idpengarang
+		where anggota.email like emaillogin
+		group by pengarang.namapengarang
+		order by jumlahpeminjaman desc;
+	
+	else
+	
+		select pengarang.namapengarang as 'pengarangdipinjam', count(pengarang.idpengarang) as 'jumlahpeminjaman'
+		from peminjaman
+			inner join eksemplar on eksemplar.ideksemplar = peminjaman.ideksemplar
+			inner join buku on buku.idbuku = eksemplar.idbuku
+			inner join bukupengarang on bukupengarang.idbuku = buku.idbuku
+			inner join pengarang on pengarang.idpengarang = bukupengarang.idpengarang
+		group by pengarang.namapengarang
+		order by jumlahpeminjaman desc;
+	
+	end if;
+END //
+
+--LAPORAN: Mendapatkan tag-tag yang sering dipinjam, baik ssecara universal maupun khusus anggota yang login (report.php reports.php)(TESTED)
+CREATE DEFINER=`root`@`localhost` PROCEDURE `laporantag`(
+	IN emaillogin varchar(100)
+)
+BEGIN
+	if (emaillogin not like '') then
+
+		select tag.namatag as 'tagdipinjam', count(tag.idtag) as 'jumlahpeminjaman'
+		from peminjaman
+			inner join anggota on anggota.email = peminjaman.email
+			inner join eksemplar on eksemplar.ideksemplar = peminjaman.ideksemplar
+			inner join buku on buku.idbuku = eksemplar.idbuku
+			inner join bukutag on bukutag.idbuku = buku.idbuku
+			inner join tag on tag.idtag = bukutag.idtag
+		where anggota.email like emaillogin
+		group by tag.namatag
+		order by jumlahpeminjaman desc;
+
+	else
+
+		select tag.namatag as 'tagdipinjam', count(tag.idtag) as 'jumlahpeminjaman'
+		from peminjaman
+			inner join eksemplar on eksemplar.ideksemplar = peminjaman.ideksemplar
+			inner join buku on buku.idbuku = eksemplar.idbuku
+			inner join bukutag on bukutag.idbuku = buku.idbuku
+			inner join tag on tag.idtag = bukutag.idtag
+		group by tag.namatag
+		order by jumlahpeminjaman desc;
+		
+	end if;
+END //
+
+
+
+
+
+
+
+
+
+
+
+

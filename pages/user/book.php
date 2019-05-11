@@ -17,7 +17,7 @@
 <html>
 
 <head>
-	<title>eLibrary</title>
+	<title>JFA Library</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<!-- OPTIONAL -->
 	<link rel="stylesheet" href="../../style/style.css">

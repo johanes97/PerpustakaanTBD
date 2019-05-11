@@ -6,19 +6,19 @@
 	$query = $conn->getQuery();
 	
 	if(isSet($_GET['deletebutton'])){
-		$tipedendadihapus = $_GET['tipedendadihapus'];
+		$tarifdendadihapus = $_GET['tarifdendadihapus'];
 		
-		$queryhapusdenda = "CALL hapusdenda($tipedendadihapus);";
+		$queryhapusdenda = "CALL hapusdenda($tarifdendadihapus);";
 		$conn->executeNonQuery($queryhapusdenda);
 	}
 	
 	if(isset($_GET['add'])){ 
-		$tipedenda = $_GET['tipedenda'];
+		$jumlahhari = $_GET['jumlahhari'];
 		$tarif = $_GET['tarif']; 
 		
-		$querytambahdenda = "CALL tambahdenda($tipedenda,$tarif);";
+		$querytambahdenda = "CALL tambahdenda($tarif,$jumlahhari);";
 		
-		if($tipedenda != 0 && $tarif != 0){
+		if($jumlahhari != 0 && $tarif != 0){
 			$conn->executeNonQuery($querytambahdenda);
 		}
 	}
@@ -27,7 +27,7 @@
 <html>
 
 <head>
-	<title>eLibrary</title>
+	<title>JFA Library</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<!-- OPTIONAL -->
 	<link rel="stylesheet" href="../../style/style.css">
@@ -54,16 +54,16 @@
 					<table>
 						<tr><th>Days</th><th>Fine</th><th>-</th></tr>
 						<?php										
-							$querypemesanan = "CALL semuadenda();";
+							$querydenda = "CALL semuadenda();";
 							
-							if($result = $query->query($querypemesanan)){
+							if($result = $query->query($querydenda)){
 								while($row = $result->fetch_array()){
 									echo "<form action='' method='get'>";
 									
 									echo "<tr>";
-									echo "<td>" . $row['tipedenda'] . "</td>";
+									echo "<td>" . $row['jumlahhari'] . "</td>";
 									echo "<td>" . $row['tarif'] . "</td>";
-									echo "<input name='tipedendadihapus' type='hidden' value='" . $row['tipedenda'] . "'>";
+									echo "<input name='tarifdendadihapus' type='hidden' value='" . $row['tarif'] . "'>";
 									echo "<td><input name='deletebutton' type='submit' value='DELETE' class='iBForm'></td>";
 									echo "</tr>";
 									
@@ -89,7 +89,7 @@
 				<span onclick="document.getElementById('myModal').style.display='none'" class="close">&times;</span>
 				<span id="judulForm">New Fine</span>
 				<form action="">
-					<div class="iForm"><input type="text" name="tipedenda" placeholder="Hari denda..."></div>
+					<div class="iForm"><input type="text" name="jumlahhari" placeholder="Hari denda..."></div>
 					<div class="iForm"><input type="text" name="tarif" placeholder="Besar tarif..."></div>
 					<div class="tombol">
 						<div><input type="submit" value="REGISTER" class="iBForm" name="add"></div>

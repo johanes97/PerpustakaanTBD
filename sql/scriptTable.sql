@@ -48,8 +48,8 @@ create table anggota(
 	tipe varchar(50) not null
 );
 create table denda(
-	tipedenda int not null primary key,
-	tarif int not null
+	tarif int not null primary key,
+	jumlahhari int not null
 );
 create table pemesanan(
 	idpemesanan int not null auto_increment primary key,

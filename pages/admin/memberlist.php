@@ -27,7 +27,7 @@
 <html>
 
 <head>
-	<title>eLibrary</title>
+	<title>JFA Library</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../../style/style.css">
 	<link rel="stylesheet" href="../../lib/font-awesome.min.css">
@@ -59,7 +59,7 @@
 				<div class="main">
 					<p id="notice"></p>
 					<table>
-						<tr><th>Email</th><th>Name</th>
+						<tr><th>Email</th><th>Name</th></tr>
 						<?php								
 							$querycarianggotabiasa = "CALL semuaanggota('user_biasa');";
 
