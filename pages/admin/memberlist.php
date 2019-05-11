@@ -59,7 +59,7 @@
 				<div class="main">
 					<p id="notice"></p>
 					<table>
-						<tr><th>Email</th><th>Name</th>
+						<tr><th>Email</th><th>Name</th></tr>
 						<?php								
 							$querycarianggotabiasa = "CALL semuaanggota('user_biasa');";
 

@@ -12,6 +12,8 @@
         <hr>
 		<li><a href="../user/order.php" class="side">Orders</a></li>
         <hr>
+		<li><a href="../user/report.php" class="side">Reports</a></li>
+		<hr>
         <li><a href="../general/journals.php" class="side">Journals Download</a></li>
         <hr>
     </ul>

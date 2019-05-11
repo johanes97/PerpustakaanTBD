@@ -58,7 +58,7 @@
 				</div>
 				<div class="main">
 					<table>
-						<tr><th>Email</th><th>Name</th>
+						<tr><th>Email</th><th>Name</th></tr>
 						<?php
 							$queryadmin = "CALL semuaanggota('admin');";
 

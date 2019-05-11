@@ -16,6 +16,8 @@
 		<hr>
 		<li><a href="../admin/fines.php" class="side">Fines</a></li>
         <hr>
+		<li><a href="../admin/reports.php" class="side">Reports</a></li>
+		<hr>
         <li><a href="../general/journals.php" class="side">Journals Download</a></li>
         <hr>
     </ul>
