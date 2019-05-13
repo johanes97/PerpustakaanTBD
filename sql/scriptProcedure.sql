@@ -15,35 +15,231 @@ END //
 
 --BUKU: Mencari buku berdasarkan judul, pengarang, atau tag (book.php books.php)(BELUM SELESAI)(BAGIAN TAG MASIH SALAH, BELUM MENGGUNAKAN IDF/BOBOT)
 CREATE DEFINER=`root`@`localhost` PROCEDURE `caribuku`(
-	IN pilihanpencarian varchar(100),
+    IN pilihanpencarian varchar(100),
     IN keyword varchar(100)
 )
 BEGIN
-	set keyword = concat('%',keyword,'%');
-	
-	if (pilihanpencarian = 'judul') then
-		
-		select distinct *
-		from bukupengarang
-			inner join buku on buku.idbuku = bukupengarang.idbuku
-			inner join pengarang on pengarang.idpengarang = bukupengarang.idpengarang
-		where buku.deleted = 0 && buku.judulbuku like keyword;
-	
-	elseif (pilihanpencarian = 'pengarang') then
-	
-		select distinct *
-		from bukupengarang
-			inner join buku on buku.idbuku = bukupengarang.idbuku
-			inner join pengarang on pengarang.idpengarang = bukupengarang.idpengarang
-		where buku.deleted = 0 && pengarang.namapengarang like keyword;
-	
-	elseif (pilihanpencarian = 'tag') then
-		
-		select distinct *
-		from buku;
-	
-	end if;
-END //
+    DECLARE _next varchar(100) DEFAULT NULL;
+    DECLARE _nextlen INT DEFAULT NULL;
+    DECLARE _value varchar(100) DEFAULT NULL;
+    DECLARE tempIdKata INT DEFAULT 0;
+    DECLARE _counterKataTemp INT DEFAULT 0;
+
+    DECLARE tempIdBuku INTEGER DEFAULT 0;
+    DECLARE tempJmlKemunculan INTEGER DEFAULT 1;
+    
+    DECLARE bobotEksemplarKata float DEFAULT 0;
+    DECLARE _idf FLOAT DEFAULT 0;
+    
+    DECLARE tempIdBukuCursor INTEGER DEFAULT 0;
+   
+   DECLARE flagFinished INTEGER DEFAULT 0;
+   
+    DECLARE rn int default 0;
+    
+    DECLARE panjangVDok float default 0;
+   DECLARE panjangVQuery float default 0;
+   DECLARE distance float default 0;
+   DECLARE totalDistance float default 0;
+    
+    DECLARE counterVDokumen INTEGER DEFAULT 1;
+    DECLARE counterVQuery INTEGER DEFAULT 1;
+     DECLARE counterVDokumenQuery INTEGER DEFAULT 1;
+    DECLARE tempBobot float DEFAULT 0;
+    
+    DECLARE result varchar(200) DEFAULT NULL;
+   
+   DECLARE dokumenCursor CURSOR FOR 
+   SELECT idBuku
+   FROM buku;
+    
+     DECLARE CONTINUE HANDLER 
+        FOR NOT FOUND SET flagFinished = 1;
+    
+    if (pilihanpencarian = 'judul') then
+    
+        DROP TEMPORARY TABLE IF EXISTS distanceTable;
+            create temporary table distanceTable as
+            select 0 as idbuku, 0.00000 as distance
+            from buku
+            LIMIT 0;
+        
+        DROP TEMPORARY TABLE IF EXISTS tempSearchKataTable;
+            create temporary table tempSearchKataTable as
+            select 0 as seqnum, namakata  as 'nama', 0.00000 as 'bobot', 0 as 'jmlKemunculan'
+            from kata
+            LIMIT 0;
+        ALTER TABLE tempSearchKataTable ADD PRIMARY KEY NONCLUSTERED (nama);
+        
+        set @rn = 0;
+         -- Iterator Judul
+        iterator:
+        LOOP
+                IF LENGTH(TRIM(keyword)) = 0 OR keyword IS NULL THEN
+                LEAVE iterator;
+                 END IF;
+                
+                -- ambil 1 kata dalam judul 
+                SET _next = SUBSTRING_INDEX(keyword,' ',1);
+                -- select _next;
+                
+                -- panjang next
+                SET _nextlen = LENGTH(_next);
+                
+                -- hilangkan spasi
+                SET _value = TRIM(_next);
+             
+             if((SELECT kata.idkata FROM kata WHERE namakata LIKE _value LIMIT 1) is not null) then
+                select idf
+                into _idf
+                from kata
+                where namakata=_value;
+            elseif((SELECT kata.idkata FROM kata WHERE namakata LIKE _value LIMIT 1) is null) then
+                set _idf = 0;
+            end if;
+            
+            select jmlKemunculan
+            into tempJmlKemunculan
+            from tempSearchKataTable
+            where nama=_value;
+            
+            if((select jmlKemunculan from tempSearchKataTable where nama = _value) is null) then
+                insert into tempSearchKataTable(seqnum, nama, bobot, jmlkemunculan) values((@rn:= @rn+1) , _value, 0.00000, 1);
+            elseif((select jmlkemunculan from tempSearchKataTable where nama =_value) is not null) then
+                update tempSearchKataTable set jmlKemunculan=tempJmlKemunculan+1 where nama=_value;
+            end if;
+            
+            update tempSearchKataTable set tempSearchKataTable.bobot= (1.0 + LOG(2,tempJmlKemunculan))*_idf where nama=_value;
+         
+            SET keyword = INSERT(keyword,1,_nextlen + 1,'');
+        END LOOP;
+        
+        iterator:
+        LOOP
+            IF counterVQuery > (select count(nama) from tempSearchKataTable) THEN
+                LEAVE iterator;
+            END IF;
+            
+            set tempBobot = (select bobot from tempSearchKataTable where seqnum = counterVQuery)+0.00000;
+        
+            set panjangVQuery = POW(tempBobot,2)+panjangVQuery;
+            
+            set counterVQuery = counterVQuery + 1;
+        END LOOP;
+      
+        set panjangVQuery = sqrt(panjangVQuery);
+        
+        set rn =0;
+        
+        set flagFinished=0;
+        open dokumenCursor;
+            
+            get_id: LOOP
+                FETCH dokumenCursor INTO tempIdBukuCursor;
+                
+                IF flagFinished = 1 THEN 
+                    LEAVE get_id;
+                END IF;
+                
+                DROP TEMPORARY TABLE IF EXISTS queryDanDokumenTable;
+                create temporary table queryDanDokumenTable as
+                select 0 as seqnum, kata.namakata as 'kataDokumen' , bukukata.bobot as 'bobotDokumen',
+                tempSearchKataTable.nama as 'kataQuery', tempSearchKataTable.bobot as 'bobotQuery'
+                from kata inner join bukukata on kata.idkata = bukukata.idkata
+                inner join tempSearchKataTable on kata.namakata = tempSearchKataTable.nama
+                LIMIT 0;
+                
+                DROP TEMPORARY TABLE IF EXISTS tempDokumenTable;
+                create temporary table tempDokumenTable as
+                select 0 as seqnum, kata.namakata as 'kataDokumen' , bukukata.bobot as 'bobotDokumen'
+                from kata inner join bukukata on kata.idkata = bukukata.idkata
+                LIMIT 0;
+                
+                set @rn = 0;
+                insert into tempDokumenTable
+                select (@rn:= @rn+1), kata.namakata as 'kataDokumen' , bukukata.bobot as 'bobotDokumen'
+                from kata inner join bukukata on kata.idkata = bukukata.idkata
+                where bukukata.idbuku = tempIdBukuCursor; 
+                
+                set @rn = 0;
+                insert into queryDanDokumenTable
+                select distinct (@rn:= @rn+1), tempDokumenTable.kataDokumen, tempDokumenTable.bobotDokumen,
+                tempSearchKataTable.nama as kataQuery, tempSearchKataTable.bobot as kataDokumen
+                from tempDokumenTable inner join tempSearchKataTable
+                on tempDokumenTable.kataDokumen = tempSearchKataTable.nama;
+                
+               iterator:
+                LOOP
+                    IF counterVDokumen > (select count(katadokumen) from tempDokumenTable) THEN
+                        LEAVE iterator;
+                    END IF;
+                    
+                    set tempBobot = (select bobotdokumen from tempDokumenTable where seqnum = counterVDokumen)+0.00000;
+                    set panjangVDok = POW(tempBobot,2)+panjangVDok;
+                    
+                    set counterVDokumen = counterVDokumen + 1;
+                END LOOP;
+
+                set panjangVDok = sqrt(panjangVDok);
+                set counterVDokumen = 1;
+
+                iterator:
+                LOOP
+                    IF counterVDokumenQuery > (select count(kataDokumen) from queryDanDokumenTable) THEN
+                        LEAVE iterator;
+                    END IF;
+                    
+                    set distance = distance +
+                    (select (queryDanDokumenTable.bobotDokumen * queryDanDokumenTable.bobotquery)
+                    from queryDanDokumenTable
+                    where queryDanDokumenTable.seqnum = counterVDokumenQuery);
+                    
+                    set counterVDokumenQuery = counterVDokumenQuery + 1;
+                END LOOP;
+                set totalDistance = distance / (panjangVDok*panjangVQuery);
+                IF(totalDistance is null) then
+                    set totalDistance=0;
+                end if;
+                
+                insert into distanceTable(idbuku, distance) values(tempIdBukuCursor,totalDistance);
+                
+                set counterVDokumenQuery = 1;
+                set totalDistance=0;
+                set distance=0;
+                set panjangVDok = 0;
+            END LOOP get_id;
+        close dokumenCursor;
+            
+        select * from distanceTable 
+        inner join bukupengarang on distanceTable.idbuku = bukupengarang.idbuku
+        inner join buku on buku.idbuku = bukupengarang.idbuku
+        inner join pengarang on pengarang.idpengarang = bukupengarang.idpengarang 
+        where buku.deleted = 0 
+        order by distanceTable.distance desc;
+        
+    elseif (pilihanpencarian = 'pengarang') then
+        set keyword = concat('%',keyword,'%');
+        
+        select distinct *
+        from bukupengarang
+            inner join buku on buku.idbuku = bukupengarang.idbuku
+            inner join pengarang on pengarang.idpengarang = bukupengarang.idpengarang
+            inner join bukutag on bukutag.idbuku = bukupengarang.idbuku
+            inner join tag on tag.idtag = bukutag.idtag
+        where buku.deleted = 0 && pengarang.namapengarang like keyword;
+    
+    elseif (pilihanpencarian = 'tag') then
+        set keyword = concat('%',keyword,'%');
+    
+        select distinct *
+        from bukutag
+            inner join buku on buku.idbuku = bukutag.idbuku
+            inner join bukupengarang on bukupengarang.idbuku = buku.idbuku
+            inner join pengarang on pengarang.idpengarang = bukupengarang.idpengarang
+            inner join tag on tag.idtag = bukutag.idtag
+        where buku.deleted = 0 && tag.namatag like keyword;
+    end if;
+END
 
 --BUKU: menghapus buku berdasarkan id buku (Books.php)(TESTED)
 CREATE DEFINER=`root`@`localhost` PROCEDURE `hapusbuku`(

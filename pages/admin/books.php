@@ -68,7 +68,7 @@
 						<span class="cari" id="by"><pre> by </pre></span>
 						<select name="pilihan" class="cari">
 							<option value="judul">Title</option>
-							<option value="kategori">Tag</option>
+							<option value="tag">Tag</option>
 							<option value="pengarang">Author</option>
 						</select>
 						<input id="button" name="iSearch" type="submit" value="SEARCH" class="cari">
@@ -131,13 +131,12 @@
 							<datalist id="pengarangs">
 						  <?php
 						  	$queryGetPengarang = "call search_multi(1, 0)";
-
+						  	$conn->freeResult();
 							if($result = $query->query($queryGetPengarang)){
 							 	while($row = $result->fetch_array()){
 							 		$nama = $row['namapengarang'];
 									echo "<option value='$nama'>";
 								 }
-								  $conn->freeResult();
 							}
 							?>
 							</datalist>
@@ -169,13 +168,12 @@
 							<datalist id="tags">
 						  <?php
 						  	$queryGetTag = "call search_multi(0, 1)";
-
+						  	$conn->freeResult();
 							if($result = $query->query($queryGetTag)){
 							 	while($row = $result->fetch_array()){
 							 		$tag = $row['namatag'];
 									echo "<option value='$tag'>";
 								 }
-								  $conn->freeResult();
 							}
 							?>
 							</datalist>
