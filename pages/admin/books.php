@@ -15,6 +15,34 @@
 	}
 ?>
 
+<?php
+	if(isset($_GET['add'])){ 
+		$judulbuku = $_GET['judul'];
+		$namapengarang = $_GET['pengarang'];
+		$tag = $_GET['tag'];
+		
+		//$tag = $_GET['kategori'];
+
+		if($judulbuku!="" && $namapengarang!=""){
+			echo "<script>console.log('masuk')</script>";
+			$conn->freeResult();
+			$queryInsertBukuPengarangTag = "call insert_book_author_tag_word('$judulbuku','$namapengarang','$tag')";
+			$conn->executeNonQuery($queryInsertBukuPengarangTag);
+			
+			// $queryGetIdBukuIdPengarang = "call search_id_book_and_id_author('$judulbuku','$namapengarang')";		
+			// $resultIdBukuIdPengarang = $query->query($queryGetIdBukuIdPengarang);
+			// $rowIdBukuIdPengarang = $resultIdBukuIdPengarang->fetch_array();
+
+			// $idbuku = $rowIdBukuIdPengarang['idBuku'];
+			// $idpengarang = $rowIdBukuIdPengarang['idPengarang'];
+
+			//$conn->freeResult();
+
+			//echo "<script>document.getElementById('tambahBuku').innerHTML = 'Book Added'</script>";
+		}
+	}
+?>
+
 <html>
 
 <head>
@@ -100,16 +128,81 @@
 				<form method="get">
 					<div class="iForm"><input type="text" name="judul" placeholder="Title"></div>
 					<div class="iForm">
-						<select name="pengarang">
+						<input list="pengarangs" id="optionPengarang">
+							<datalist id="pengarangs">
 						  <?php
-							// if($result = $query->query($queryShowBook)){
-							// 	while($row = $result->fetch_array()){
-									echo "<option value='audi' selected>Audi</option>";
-								// }
-							//}
-						?>
-						</select>
+						  	$queryGetPengarang = "call search_multi(1, 0)";
+
+							if($result = $query->query($queryGetPengarang)){
+							 	while($row = $result->fetch_array()){
+							 		$nama = $row['namapengarang'];
+									echo "<option value='$nama'>";
+								 }
+								  $conn->freeResult();
+							}
+							?>
+							</datalist>
+
 					</div>
+					<div class="iForm"><input type="hidden" name="pengarang" id="listpengarang2"></div>
+					<div style="background-color: coral;  width:100px; cursor: pointer;" id="btnPengarang">
+						<p >Add author</p>
+					</div>
+					<p id="listPengarang" name="listPengarang"></p>
+					<script>
+						document.getElementById("btnPengarang").addEventListener("click", addPengarang);
+
+						function addPengarang() {
+							var tempPengarang = document.getElementById("listPengarang");
+							var tempInputPengarang = document.getElementById("optionPengarang");
+							var tempInputPengarang2 = document.getElementById("listpengarang2");
+							if(tempInputPengarang.value != "")
+							{
+								tempPengarang.innerHTML = tempPengarang.innerHTML + ", " +  tempInputPengarang.value;
+								tempInputPengarang2.value = tempPengarang.innerHTML;
+								tempInputPengarang.value = "";
+							}
+						}
+					</script>
+
+					<div class="iForm">
+						<input list="tags" id="optionTag">
+							<datalist id="tags">
+						  <?php
+						  	$queryGetTag = "call search_multi(0, 1)";
+
+							if($result = $query->query($queryGetTag)){
+							 	while($row = $result->fetch_array()){
+							 		$tag = $row['namatag'];
+									echo "<option value='$tag'>";
+								 }
+								  $conn->freeResult();
+							}
+							?>
+							</datalist>
+
+					</div>
+					<div class="iForm"><input type="hidden" name="tag" id="listtag2"></div>
+					<div style="background-color: coral;  width:100px; cursor: pointer;" id="btnTag">
+						<p >Add Tag</p>
+					</div>
+					<p id="listTag" name="listTag"></p>
+					<script>
+						document.getElementById("btnTag").addEventListener("click", addTag);
+
+						function addTag() {
+							var tempTag = document.getElementById("listTag");
+							var tempInputTag = document.getElementById("optionTag");
+							var tempInputTag2 = document.getElementById("listtag2");
+							if(tempInputTag.value != "")
+							{
+								tempTag.innerHTML = tempTag.innerHTML + ", " +  tempInputTag.value;
+								tempInputTag2.value = tempTag.innerHTML;
+								tempInputTag.value = "";
+							}
+						}
+					</script>
+
 					<div class="tombol">
 						<div><input type="submit" value="ADD" class="iBForm" name="add"></div>
 					</div>
@@ -132,37 +225,5 @@
 <?php
 	if(isset($_GET['iAdd'])){
 		echo "<script>modalOn();</script>";
-	}
-	if(isset($_GET['add'])){ 
-		$judulbuku = $_GET['judul'];
-		$namapengarang = $_GET['pengarang'];
-		//$tag = $_GET['kategori'];
-
-		if($judulbuku!="" && $namapengarang!=""){
-			$queryInsertBook = "INSERT INTO buku(judulbuku) VALUES('$judulbuku');";
-			$queryInsertPengarang = "INSERT INTO pengarang(namapengarang) VALUES('$namapengarang');";
-			$conn->executeNonQuery($queryInsertBook);
-			$conn->executeNonQuery($queryInsertPengarang);
-			
-			$queryGetIdBukuIdPengarang = "call search_id_book_and_id_author('$judulbuku','$namapengarang')";
-			
-			$resultIdBukuIdPengarang = $query->query($queryGetIdBukuIdPengarang);
-			$rowIdBukuIdPengarang = $resultIdBukuIdPengarang->fetch_array();
-			$idbuku = $rowIdBukuIdPengarang['idBuku'];
-
-			$idpengarang = $rowIdBukuIdPengarang['idPengarang'];
-
-			$conn->freeResult();
-
-			$queryInsertBukuPengarang = "call insert_book_author($idbuku,$idpengarang)";
-			$conn->executeNonQuery($queryInsertBukuPengarang);
-
-			//$idKate = $conn->executeQuery("SELECT id_kategori FROM kategori WHERE nama_kategori = '$kategori'")[0][0];
-			//$queryInsertKategori = "INSERT INTO kategori_buku 
-			//		VALUES ('$idBuku','$idKate')";
-			//$conn->executeNonQuery($queryInsertKategori); 
-
-			echo "<script>document.getElementById('tambahBuku').innerHTML = 'Book Added'</script>";
-		}
 	}
 ?>
