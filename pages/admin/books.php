@@ -25,7 +25,6 @@
 
 		if($judulbuku!="" && $namapengarang!=""){
 			echo "<script>console.log('masuk')</script>";
-			$conn->freeResult();
 			$queryInsertBukuPengarangTag = "call insert_book_author_tag_word('$judulbuku','$namapengarang','$tag')";
 			$conn->executeNonQuery($queryInsertBukuPengarangTag);
 			
