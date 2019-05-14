@@ -6,12 +6,15 @@
 --BUKU: Mendapatkan daftar seluruh buku beserta pengarang, tag, kata, dan jumlah eksemplar (book.php books.php)(BELUM SELESAI)(BAGIAN TAG MASIH SALAH)
 CREATE DEFINER=`root`@`localhost` PROCEDURE `semuabuku`()
 BEGIN
-	select distinct *
-	from bukupengarang
-		inner join buku on buku.idbuku = bukupengarang.idbuku
-		inner join pengarang on pengarang.idpengarang = bukupengarang.idpengarang
-	where buku.deleted = 0;
-END //
+    select distinct *, GROUP_CONCAT(distinct namapengarang SEPARATOR ', ') as namapengarangConcat
+    from bukupengarang
+        inner join buku on buku.idbuku = bukupengarang.idbuku
+        inner join pengarang on pengarang.idpengarang = bukupengarang.idpengarang
+        inner join bukutag on bukutag.idbuku = bukupengarang.idbuku
+        inner join tag on tag.idtag = bukutag.idtag
+        where buku.deleted = 0
+        group by buku.idbuku;
+END
 
 --BUKU: Mencari buku berdasarkan judul, pengarang, atau tag (book.php books.php)(BELUM SELESAI)(BAGIAN TAG MASIH SALAH, BELUM MENGGUNAKAN IDF/BOBOT)
 CREATE DEFINER=`root`@`localhost` PROCEDURE `caribuku`(
@@ -51,7 +54,8 @@ BEGIN
    
    DECLARE dokumenCursor CURSOR FOR 
    SELECT idBuku
-   FROM buku;
+   FROM buku
+   where buku.deleted = 0;
     
      DECLARE CONTINUE HANDLER 
         FOR NOT FOUND SET flagFinished = 1;
@@ -210,62 +214,140 @@ BEGIN
             END LOOP get_id;
         close dokumenCursor;
             
-        select * from distanceTable 
+        select *, GROUP_CONCAT(distinct namapengarang SEPARATOR ', ') as namapengarangConcat 
+        from distanceTable
         inner join bukupengarang on distanceTable.idbuku = bukupengarang.idbuku
         inner join buku on buku.idbuku = bukupengarang.idbuku
         inner join pengarang on pengarang.idpengarang = bukupengarang.idpengarang 
-        where buku.deleted = 0 
+        where distanceTable.distance > 0
+        group by buku.idbuku
         order by distanceTable.distance desc;
         
     elseif (pilihanpencarian = 'pengarang') then
         set keyword = concat('%',keyword,'%');
         
-        select distinct *
+        select distinct *, GROUP_CONCAT(distinct namapengarang SEPARATOR ', ') as namapengarangConcat
         from bukupengarang
             inner join buku on buku.idbuku = bukupengarang.idbuku
             inner join pengarang on pengarang.idpengarang = bukupengarang.idpengarang
             inner join bukutag on bukutag.idbuku = bukupengarang.idbuku
             inner join tag on tag.idtag = bukutag.idtag
-        where buku.deleted = 0 && pengarang.namapengarang like keyword;
+            where buku.deleted = 0 && pengarang.namapengarang like keyword
+            group by buku.idbuku;
     
     elseif (pilihanpencarian = 'tag') then
         set keyword = concat('%',keyword,'%');
     
-        select distinct *
+        select distinct *, GROUP_CONCAT(distinct namapengarang SEPARATOR ', ') as namapengarangConcat
         from bukutag
             inner join buku on buku.idbuku = bukutag.idbuku
             inner join bukupengarang on bukupengarang.idbuku = buku.idbuku
             inner join pengarang on pengarang.idpengarang = bukupengarang.idpengarang
             inner join tag on tag.idtag = bukutag.idtag
-        where buku.deleted = 0 && tag.namatag like keyword;
+            where buku.deleted = 0 && tag.namatag like keyword
+            group by buku.idbuku;
     end if;
 END
 
 --BUKU: menghapus buku berdasarkan id buku (Books.php)(TESTED)
 CREATE DEFINER=`root`@`localhost` PROCEDURE `hapusbuku`(
-	IN idbukudihapus int
+    IN idbukudihapus int
 )
 BEGIN
-	delete from pemesanan
-	where pemesanan.idbuku = idbukudihapus;
-	
-	delete from bukupengarang
-	where bukupengarang.idbuku = idbukudihapus;
-	
-	delete from bukutag
-	where bukutag.idbuku = idbukudihapus;
-		
-	delete from bukukata
-	where bukukata.idbuku = idbukudihapus;
-		
-	update eksemplar
-	set deleted = 1
-	where ekssemplar.idbuku = idbukudihapus;
-	
-	update buku
-	set deleted = 1
-	where buku.idbuku = idbukudihapus;
-END //
+    DECLARE _jmlBuku INT DEFAULT 0;
+    DECLARE _jmlBukuPunyaX INT DEFAULT 0;
+    
+    DECLARE flagFinished INTEGER DEFAULT 0;
+    DECLARE tempCursorIdKata INTEGER DEFAULT 0;
+    DECLARE tempCursorIdBuku INTEGER DEFAULT 0;
+    DECLARE tempCursorJmlKemunculan INTEGER DEFAULT 0;
+    
+    DECLARE _idf FLOAT DEFAULT 0;
+    DECLARE bobotEksemplarKata float DEFAULT 0;
+    
+    DECLARE idfCursor CURSOR FOR 
+    SELECT idkata
+    FROM kata;
+    
+    DECLARE bobotCursor CURSOR FOR 
+    SELECT idbuku, idkata, jmlkemunculan
+    FROM bukukata;
+    
+     DECLARE CONTINUE HANDLER 
+        FOR NOT FOUND SET flagFinished = 1;
+
+    delete from pemesanan
+    where pemesanan.idbuku = idbukudihapus;
+    
+    delete from bukupengarang
+    where bukupengarang.idbuku = idbukudihapus;
+    
+    delete from bukutag
+    where bukutag.idbuku = idbukudihapus;
+        
+    delete from bukukata
+    where bukukata.idbuku = idbukudihapus;
+        
+    update eksemplar
+    set deleted = 1
+    where eksemplar.idbuku = idbukudihapus;
+    
+    update buku
+    set deleted = 1
+    where buku.idbuku = idbukudihapus;
+    
+    select count(eksemplar.idbuku)
+    into _jmlBuku
+    from eksemplar
+    where eksemplar.deleted = 0;
+    
+     open idfCursor;
+         
+        get_kata_and_idf: LOOP
+            FETCH idfCursor INTO tempCursorIdKata;
+            IF flagFinished = 1 THEN 
+                LEAVE get_kata_and_idf;
+            END IF;
+            
+            select count(eksemplar.idbuku)
+            into _jmlBukuPunyaX 
+            from eksemplar inner join BukuKata on eksemplar.idbuku = BukuKata.idbuku
+            where BukuKata.idkata=tempCursorIdKata;
+            
+            SELECT LOG(2,(_jmlBuku+0.0)/(_jmlBukuPunyaX+0.0))
+            into _idf;
+            
+            update kata set idf = _idf where idkata=tempCursorIdKata;
+        END LOOP get_kata_and_idf;
+            
+    close idfCursor;
+    
+    set flagFinished = 0;
+    
+     open bobotCursor;
+         
+        get_bobot: LOOP
+            FETCH bobotCursor INTO tempCursorIdBuku, tempCursorIdKata, tempCursorJmlKemunculan;
+            IF flagFinished = 1 THEN 
+                LEAVE get_bobot;
+            END IF;
+            
+            select idf
+            into _idf
+            from kata
+            where idkata = tempCursorIdKata;
+            
+            select (1 + LOG(2,tempCursorJmlKemunculan))*_idf
+            into bobotEksemplarKata;
+            
+            update bukukata 
+            set bobot = bobotEksemplarKata 
+            where idbuku=tempCursorIdBuku and idkata=tempCursorIdKata;
+            
+        END LOOP get_bobot;
+            
+    close bobotCursor;
+END
 
 --BUKU: Mendapatkan rekomendasi buku untuk anggota yang login (recommendation.php)
 CREATE DEFINER=`root`@`localhost` PROCEDURE `rekomendasibuku`(
@@ -948,6 +1030,7 @@ BEGIN
     DECLARE tempCursorJmlKemunculan INTEGER DEFAULT 0;
     
     DECLARE bobotEksemplarKata float DEFAULT 0;
+    DECLARE flagNewEksemplar INTEGER DEFAULT 0;
     
      DECLARE bukuPengarangCursor CURSOR FOR
      Select idbuku,idpengarang
@@ -1074,6 +1157,8 @@ BEGIN
                 select outerJoinTable.idbuku1, outerJoinTable.idpengarang1
                 from outerJoinTable
                 where outerJoinTable.idbuku2 is null and outerJoinTable.idpengarang2 is null;
+                
+                SET flagNewEksemplar = 1;
             elseif(countTempBukuPengarang != countBukuPengarang) 
                 then
                 INSERT INTO buku(judulBuku) values (judulBukuInput);
@@ -1139,10 +1224,6 @@ BEGIN
         SET tagInput = INSERT(tagInput,1,_nextlen + 1,'');
     END LOOP;
     
-     select count(eksemplar.idbuku)
-     into _jmlBuku
-     from eksemplar;
-    
     -- Iterator Judul
     iterator:
     LOOP
@@ -1179,7 +1260,7 @@ BEGIN
          if((select idkata from bukukata where idbuku=tempIdBuku and idkata=tempIdKata) is null) then
             set _counterKataTemp = 1;
             INSERT INTO bukukata(idbuku,idkata,jmlkemunculan,bobot) VALUES(tempIdBuku,tempIdKata,_counterKataTemp,0);
-        elseif((select idkata from bukukata where idbuku=tempIdBuku and idkata=tempIdKata) is not null) then
+        elseif((select idkata from bukukata where idbuku=tempIdBuku and idkata=tempIdKata) is not null AND flagNewEksemplar = 0) then
             select jmlkemunculan 
             into _counterKataTemp 
             from bukukata 
@@ -1194,6 +1275,11 @@ BEGIN
         end if;
         SET judulBukuInput = INSERT(judulBukuInput,1,_nextlen + 1,'');
     END LOOP;
+    
+    select count(eksemplar.idbuku)
+    into _jmlBuku
+    from eksemplar
+    where eksemplar.deleted = 0;
     
      open idfCursor;
          

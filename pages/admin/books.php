@@ -96,7 +96,7 @@
 									echo "<tr>";
 									echo "<td>" . $row['idbuku'] . "</td>";
 									echo "<td>" . $row['judulbuku'] . "</td>";
-									echo "<td>" . $row['namapengarang'] . "</td>";
+									echo "<td>" . $row['namapengarangConcat'] . "</td>";
 									echo "<td>" . "</td>";
 									echo "<td>" . "</td>";
 									echo "<input name='idbukudihapus' type='hidden' value='" . $row['idbuku'] . "'>";
