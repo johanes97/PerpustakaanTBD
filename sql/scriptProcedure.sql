@@ -227,7 +227,7 @@ BEGIN
         inner join bukutag on bukutag.idbuku = bukupengarang.idbuku
         inner join tag on tag.idtag = bukutag.idtag
         inner join eksemplar on eksemplar.idbuku = buku.idbuku
-        where distanceTable.distance > 0 and eksemplar.deleted = 0
+        where distanceTable.distance > 0 and eksemplar.deleted = 0 and eksemplar.status = 0
         group by buku.idbuku
         order by distanceTable.distance desc;
         
@@ -243,7 +243,7 @@ BEGIN
                 inner join bukutag on bukutag.idbuku = bukupengarang.idbuku
                 inner join tag on tag.idtag = bukutag.idtag
                 inner join eksemplar on eksemplar.idbuku = buku.idbuku
-                where buku.deleted = 0 and eksemplar.deleted = 0 and ");
+                where buku.deleted = 0 and eksemplar.deleted = 0 and eksemplar.status = 0 and ");
         if (pilihanpencarian = 'pengarang') then
             set @result := concat(@result,"pengarang.namapengarang like '", keyword, "' 
                 group by buku.idbuku;");
