@@ -538,36 +538,37 @@ END //
 
 --PEMINJAMAN: Mendapatkan seluruh peminjaman, baik untuk anggota yang login maupun admin (borrow.php borrows.php)(TESTED)
 CREATE DEFINER=`root`@`localhost` PROCEDURE `semuapeminjaman`(
-	IN statusdicari varchar(100),
-	IN emaillogin varchar(100)
+    IN statusdicari varchar(100),
+    IN emaillogin varchar(100)
 )
 BEGIN
-	if (emaillogin not like '') then
-	
-		select *
-		from peminjaman
-			inner join anggota on anggota.email = peminjaman.email
-			inner join eksemplar on eksemplar.ideksemplar = peminjaman.ideksemplar
-			inner join buku on buku.idbuku = eksemplar.idbuku
-			inner join bukupengarang on bukupengarang.idbuku = buku.idbuku
-			inner join pengarang on pengarang.idpengarang = bukupengarang.idpengarang
-		where peminjaman.email like emaillogin && peminjaman.statuspeminjaman like statusdicari
-		order by peminjaman.bataspengembalian asc;
-	
-	else
-	
-		select *
-		from peminjaman
-			inner join anggota on anggota.email = peminjaman.email
-			inner join eksemplar on eksemplar.ideksemplar = peminjaman.ideksemplar
-			inner join buku on buku.idbuku = eksemplar.idbuku
-			inner join bukupengarang on bukupengarang.idbuku = buku.idbuku
-			inner join pengarang on pengarang.idpengarang = bukupengarang.idpengarang
-		where peminjaman.statuspeminjaman like statusdicari
-		order by peminjaman.bataspengembalian asc;
-	
-	end if;
-END //
+    if (emaillogin not like '') then
+    
+        select *, GROUP_CONCAT(distinct namapengarang SEPARATOR ', ') as namapengarangConcat
+        from peminjaman
+            inner join anggota on anggota.email = peminjaman.email
+            inner join eksemplar on eksemplar.ideksemplar = peminjaman.ideksemplar
+            inner join buku on buku.idbuku = eksemplar.idbuku
+            inner join bukupengarang on bukupengarang.idbuku = buku.idbuku
+            inner join pengarang on pengarang.idpengarang = bukupengarang.idpengarang
+        where peminjaman.email like emaillogin && peminjaman.statuspeminjaman like statusdicari
+        group by eksemplar.ideksemplar
+        order by peminjaman.bataspengembalian asc;
+    
+    else
+        select *, GROUP_CONCAT(distinct namapengarang SEPARATOR ', ') as namapengarangConcat
+        from peminjaman
+            inner join anggota on anggota.email = peminjaman.email
+            inner join eksemplar on eksemplar.ideksemplar = peminjaman.ideksemplar
+            inner join buku on buku.idbuku = eksemplar.idbuku
+            inner join bukupengarang on bukupengarang.idbuku = buku.idbuku
+            inner join pengarang on pengarang.idpengarang = bukupengarang.idpengarang
+        where peminjaman.statuspeminjaman like statusdicari
+        group by eksemplar.ideksemplar
+        order by peminjaman.bataspengembalian asc;
+    
+    end if;
+END
 
 --PEMINJAMAN: Mengupdate hari terlambat dan besar denda (borrows.php)(TESTED)
 CREATE DEFINER=`root`@`localhost` PROCEDURE `updatepeminjaman`()
