@@ -15,7 +15,7 @@
 		$querycek="CALL login('$email','$pass');";
 		
 		if($pass == $copass){
-			if($conn->executeQuery($querycek) != null){
+			if($conn->executeQuery($querycek) == null){
 				if($email != "" && $nama != "" && $pass != "" && $copass != ""){
 					$conn->executeNonQuery($querytambahanggota);
 				}

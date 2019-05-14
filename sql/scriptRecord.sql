@@ -1,4 +1,4 @@
--- Nama basis data: perpustakaantbd
+-- Nama basis data: jfalibrary
 
 -- Buku
 insert into buku(judulbuku,deleted)

@@ -81,7 +81,7 @@
 									echo "<tr>";
 									echo "<td>" . $row['nama'] . "</td>";
 									echo "<td>" . $row['judulbuku'] . "</td>";
-									echo "<td>" . $row['namapengarang'] . "</td>";
+									echo "<td>" . $row['namapengarangConcat'] . "</td>";
 									echo "<td>" . $row['tglpeminjaman'] . "</td>";
 									echo "<td>" . $row['bataspengembalian'] . "</td>";
 									echo "<td>" . $row['durasihariterlambat'] . "</td>";
