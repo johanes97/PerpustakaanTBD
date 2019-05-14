@@ -49,7 +49,7 @@
 				</div>
 				<div class="main">
 					<table>
-						<tr><th>Book ID</th><th>Book Title</th><th>Author</th><th>Tag</th><th>Order</th></tr>
+						<tr><th>Book ID</th><th>Book Title</th><th>Author</th><th>Tag</th><th>Copies Available</th><th>-</th></tr>
 						<?php
 							$querybuku="CALL semuabuku()";
 
@@ -68,7 +68,8 @@
 									echo "<td>" . $row['idbuku'] . "</td>";
 									echo "<td>" . $row['judulbuku'] . "</td>";
 									echo "<td>" . $row['namapengarangConcat'] . "</td>";
-									echo "<td>" . $row['namatag'] . "</td>";
+									echo "<td>" . $row['namatagConcat'] . "</td>";
+									echo "<td>" . $row['ideksemplarConcat'] . "</td>";
 									echo "<td>" . "</td>";
 									echo "<input name='idbukudipesan' type='hidden' value='" . $row['idbuku'] . "'>";
 									echo "<td><input name='orderbutton' type='submit' value='ORDER' class='iBForm'></td>";

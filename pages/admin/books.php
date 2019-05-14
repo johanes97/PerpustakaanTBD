@@ -78,7 +78,7 @@
 				<div class="main">
 					<p id="tambahBuku"></p>
 					<table>
-						<tr><th>Book ID</th><th>Book Title</th><th>Author</th><th>Tag</th><th>Eksemplar Tersedia</th><th>-</th></tr>
+						<tr><th>Book ID</th><th>Book Title</th><th>Author</th><th>Tag</th><th>Copies Available</th><th>-</th></tr>
 						<?php
 							$querysemuabuku = "CALL semuabuku()";
 
@@ -97,8 +97,8 @@
 									echo "<td>" . $row['idbuku'] . "</td>";
 									echo "<td>" . $row['judulbuku'] . "</td>";
 									echo "<td>" . $row['namapengarangConcat'] . "</td>";
-									echo "<td>" . "</td>";
-									echo "<td>" . "</td>";
+									echo "<td>" . $row['namatagConcat'] . "</td>";
+									echo "<td>" . $row['ideksemplarConcat'] . "</td>";
 									echo "<input name='idbukudihapus' type='hidden' value='" . $row['idbuku'] . "'>";
 									echo "<td><input name='deletebutton' type='submit' value='DELETE' class='iBForm'></td>";
 									echo "</tr>";

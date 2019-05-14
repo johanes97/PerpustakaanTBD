@@ -6,13 +6,17 @@
 --BUKU: Mendapatkan daftar seluruh buku beserta pengarang, tag, kata, dan jumlah eksemplar (book.php books.php)(BELUM SELESAI)(BAGIAN TAG MASIH SALAH)
 CREATE DEFINER=`root`@`localhost` PROCEDURE `semuabuku`()
 BEGIN
-    select distinct *, GROUP_CONCAT(distinct namapengarang SEPARATOR ', ') as namapengarangConcat
+    select distinct Buku.idbuku, Buku.judulbuku, tag.namatag,
+    GROUP_CONCAT(distinct namapengarang SEPARATOR ', ') as namapengarangConcat,
+    GROUP_CONCAT(distinct namatag SEPARATOR ', ') as namatagConcat,
+    GROUP_CONCAT(distinct ideksemplar SEPARATOR ', ') as ideksemplarConcat
     from bukupengarang
         inner join buku on buku.idbuku = bukupengarang.idbuku
         inner join pengarang on pengarang.idpengarang = bukupengarang.idpengarang
         inner join bukutag on bukutag.idbuku = bukupengarang.idbuku
         inner join tag on tag.idtag = bukutag.idtag
-        where buku.deleted = 0
+        inner join eksemplar on eksemplar.idbuku = buku.idbuku
+        where buku.deleted = 0 and eksemplar.status = 1 
         group by buku.idbuku;
 END
 
@@ -36,28 +40,28 @@ BEGIN
     
     DECLARE tempIdBukuCursor INTEGER DEFAULT 0;
    
-   DECLARE flagFinished INTEGER DEFAULT 0;
+    DECLARE flagFinished INTEGER DEFAULT 0;
    
     DECLARE rn int default 0;
     
     DECLARE panjangVDok float default 0;
-   DECLARE panjangVQuery float default 0;
-   DECLARE distance float default 0;
-   DECLARE totalDistance float default 0;
+    DECLARE panjangVQuery float default 0;
+    DECLARE distance float default 0;
+    DECLARE totalDistance float default 0;
     
     DECLARE counterVDokumen INTEGER DEFAULT 1;
     DECLARE counterVQuery INTEGER DEFAULT 1;
-     DECLARE counterVDokumenQuery INTEGER DEFAULT 1;
+    DECLARE counterVDokumenQuery INTEGER DEFAULT 1;
     DECLARE tempBobot float DEFAULT 0;
     
-    DECLARE result varchar(200) DEFAULT NULL;
+    -- DECLARE result varchar(200) DEFAULT NULL;
    
-   DECLARE dokumenCursor CURSOR FOR 
-   SELECT idBuku
-   FROM buku
-   where buku.deleted = 0;
+    DECLARE dokumenCursor CURSOR FOR 
+    SELECT idBuku
+    FROM buku
+    where buku.deleted = 0;
     
-     DECLARE CONTINUE HANDLER 
+    DECLARE CONTINUE HANDLER 
         FOR NOT FOUND SET flagFinished = 1;
     
     if (pilihanpencarian = 'judul') then
@@ -214,38 +218,47 @@ BEGIN
             END LOOP get_id;
         close dokumenCursor;
             
-        select *, GROUP_CONCAT(distinct namapengarang SEPARATOR ', ') as namapengarangConcat 
+        select Buku.idbuku, Buku.judulbuku, tag.namatag,
+            GROUP_CONCAT(distinct namapengarang SEPARATOR ', ') as namapengarangConcat,
+            GROUP_CONCAT(distinct namatag SEPARATOR ', ') as namatagConcat,
+            GROUP_CONCAT(distinct ideksemplar SEPARATOR ', ') as ideksemplarConcat
         from distanceTable
         inner join bukupengarang on distanceTable.idbuku = bukupengarang.idbuku
         inner join buku on buku.idbuku = bukupengarang.idbuku
         inner join pengarang on pengarang.idpengarang = bukupengarang.idpengarang 
-        where distanceTable.distance > 0
+        inner join bukutag on bukutag.idbuku = bukupengarang.idbuku
+        inner join tag on tag.idtag = bukutag.idtag
+        inner join eksemplar on eksemplar.idbuku = buku.idbuku
+        where distanceTable.distance > 0 and eksemplar.status = 1
         group by buku.idbuku
         order by distanceTable.distance desc;
         
-    elseif (pilihanpencarian = 'pengarang') then
+    elseif (pilihanpencarian != 'judul') then
         set keyword = concat('%',keyword,'%');
-        
-        select distinct *, GROUP_CONCAT(distinct namapengarang SEPARATOR ', ') as namapengarangConcat
-        from bukupengarang
-            inner join buku on buku.idbuku = bukupengarang.idbuku
-            inner join pengarang on pengarang.idpengarang = bukupengarang.idpengarang
-            inner join bukutag on bukutag.idbuku = bukupengarang.idbuku
-            inner join tag on tag.idtag = bukutag.idtag
-            where buku.deleted = 0 && pengarang.namapengarang like keyword
-            group by buku.idbuku;
-    
-    elseif (pilihanpencarian = 'tag') then
-        set keyword = concat('%',keyword,'%');
-    
-        select distinct *, GROUP_CONCAT(distinct namapengarang SEPARATOR ', ') as namapengarangConcat
-        from bukutag
-            inner join buku on buku.idbuku = bukutag.idbuku
-            inner join bukupengarang on bukupengarang.idbuku = buku.idbuku
-            inner join pengarang on pengarang.idpengarang = bukupengarang.idpengarang
-            inner join tag on tag.idtag = bukutag.idtag
-            where buku.deleted = 0 && tag.namatag like keyword
-            group by buku.idbuku;
+        set @result := concat("select Buku.idbuku, Buku.judulbuku, tag.namatag,
+                GROUP_CONCAT(distinct namapengarang SEPARATOR ', ') as namapengarangConcat,
+                GROUP_CONCAT(distinct namatag SEPARATOR ', ') as namatagConcat,
+                GROUP_CONCAT(distinct ideksemplar SEPARATOR ', ') as ideksemplarConcat
+            from bukupengarang
+                inner join buku on buku.idbuku = bukupengarang.idbuku
+                inner join pengarang on pengarang.idpengarang = bukupengarang.idpengarang
+                inner join bukutag on bukutag.idbuku = bukupengarang.idbuku
+                inner join tag on tag.idtag = bukutag.idtag
+                inner join eksemplar on eksemplar.idbuku = buku.idbuku
+                where buku.deleted = 0 and eksemplar.status = 1 and ");
+        if (pilihanpencarian = 'pengarang') then
+            set @result := concat(@result,"pengarang.namapengarang like '", keyword, "' 
+                group by buku.idbuku;");
+            PREPARE stmt1 FROM @result; 
+            EXECUTE stmt1; 
+            DEALLOCATE PREPARE stmt1;
+        elseif (pilihanpencarian = 'tag') then
+            set @result := concat(@result,"tag.namatag like '", keyword, "' 
+                group by buku.idbuku;");
+            PREPARE stmt1 FROM @result; 
+            EXECUTE stmt1; 
+            DEALLOCATE PREPARE stmt1;
+        end if;
     end if;
 END
 
