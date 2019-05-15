@@ -424,74 +424,92 @@ END //
 
 --PEMESANAN: Mendapatkan daftar seluruh pemesanan, baik untuk anggota yang login maupun admin (order.php orders.php)(TESTED)
 CREATE DEFINER=`root`@`localhost` PROCEDURE `semuapemesanan`(
-	IN statusdicari varchar(100),
-	IN emaillogin varchar(100)
+    IN statusdicari varchar(100),
+    IN emaillogin varchar(100)
 )
 BEGIN
-	if (emaillogin not like '') then
-		
-		select *
-		from pemesanan
-			inner join buku on buku.idbuku = pemesanan.idbuku
-			inner join anggota on pemesanan.email = anggota.email
-		where anggota.email like emaillogin && pemesanan.statuspemesanan like statusdicari
-		order by pemesanan.statuspemesanan desc, pemesanan.tglpemesanan asc;
-		
-	else
-	
-		select *
-		from pemesanan
-			inner join buku on buku.idbuku = pemesanan.idbuku
-			inner join anggota on pemesanan.email = anggota.email
-		where pemesanan.statuspemesanan like statusdicari
-		order by pemesanan.statuspemesanan desc, pemesanan.tglpemesanan asc;
-		
-	end if;
-END //
+    set @result = "select *
+        from pemesanan
+            inner join buku on buku.idbuku = pemesanan.idbuku
+            inner join anggota on pemesanan.email = anggota.email ";
+    if (emaillogin not like '') then
+        if(statusdicari != '') then
+            set @result = concat(@result, "where anggota.email like '", emaillogin, "' && pemesanan.statuspemesanan like '", statusdicari, "' 
+            order by pemesanan.statuspemesanan desc, pemesanan.tglpemesanan asc;");
+        else
+            set @result = concat(@result, "where anggota.email like '", emaillogin, "' 
+            order by pemesanan.idpemesanan asc;");
+        end if;
+    else
+        if(statusdicari != '') then
+            set @result = concat(@result, "where pemesanan.statuspemesanan like '", statusdicari, "'
+            order by pemesanan.statuspemesanan desc, pemesanan.tglpemesanan asc;");
+        else
+            set @result = concat(@result, 
+            "order by pemesanan.idpemesanan asc;");
+        end if;
+    end if;
+    PREPARE stmt1 FROM @result; 
+    EXECUTE stmt1; 
+    DEALLOCATE PREPARE stmt1;
+END
 
 --PEMESANAN: Mencari daftar pemesanan, baik untuk anggota yang login maupun admin (order.php orders.php)(TESTED)
 CREATE DEFINER=`root`@`localhost` PROCEDURE `caripemesanan`(
-	IN pilihanpencarian varchar(100),
-	IN keyword varchar(100),
-	IN statusdicari varchar(100),
-	IN emaillogin varchar(100)
+    IN pilihanpencarian varchar(100),
+    IN keyword varchar(100),
+    IN statusdicari varchar(100),
+    IN emaillogin varchar(100)
 )
 BEGIN
-	set keyword = concat('%',keyword,'%');
+    set keyword = concat('%',keyword,'%');
 
-	if (emaillogin not like '') then
-		
-		select *
-		from pemesanan
-			inner join buku on buku.idbuku = pemesanan.idbuku
-			inner join anggota on pemesanan.email = anggota.email
-		where pemesanan.statuspemesanan like statusdicari && anggota.email like emaillogin && buku.judulbuku like keyword
-		order by statuspemesanan desc, tglpemesanan asc;
-		
-	else
-	
-		if (pilihanpencarian like 'buku') then
-		
-			select *
-			from pemesanan
-				inner join buku on buku.idbuku = pemesanan.idbuku
-				inner join anggota on pemesanan.email = anggota.email
-			where pemesanan.statuspemesanan like statusdicari && buku.judulbuku like keyword
-			order by statuspemesanan desc, tglpemesanan asc;
-		
-		elseif (pilihanpencarian like 'anggota') then
-		
-			select *
-			from pemesanan
-				inner join buku on buku.idbuku = pemesanan.idbuku
-				inner join anggota on pemesanan.email = anggota.email
-			where pemesanan.statuspemesanan like statusdicari && anggota.nama like keyword
-			order by statuspemesanan desc, tglpemesanan asc;
-			
-		end if;
-	
-	end if;
-END //
+    set @result = "select *
+        from pemesanan
+            inner join buku on buku.idbuku = pemesanan.idbuku 
+            inner join anggota on pemesanan.email = anggota.email ";
+    if (emaillogin not like '') then
+        if(statusdicari != '') then
+            set @result = concat(@result, 
+            "where pemesanan.statuspemesanan like '", statusdicari, "' && 
+            anggota.email like '", emaillogin, "' && buku.judulbuku like '", keyword, "'
+            order by statuspemesanan desc, tglpemesanan asc;");
+        else
+            set @result = concat(@result, 
+            "where anggota.email like '", emaillogin, "' && buku.judulbuku like '", keyword, "' 
+            order by idpemesanan asc;");
+        end if;
+    else
+        if(statusdicari != '') then
+            if (pilihanpencarian like 'buku') then
+                set @result = concat(@result,
+                "where pemesanan.statuspemesanan like '", statusdicari, "' && buku.judulbuku like '", keyword, "' 
+                order by statuspemesanan desc, tglpemesanan asc;");
+            
+            elseif (pilihanpencarian like 'anggota') then
+                set @result = concat(@result,
+                "where pemesanan.statuspemesanan like '", statusdicari, "' && anggota.nama like '", keyword, "'
+                order by statuspemesanan desc, tglpemesanan asc;");
+                
+            end if;
+        else
+            if (pilihanpencarian like 'buku') then
+                set @result = concat(@result,
+                "where buku.judulbuku like '", keyword, "' 
+                order by idpemesanan asc;");
+            
+            elseif (pilihanpencarian like 'anggota') then
+                set @result = concat(@result,
+                "where anggota.nama like '", keyword, "' 
+                order by idpemesanan asc;");
+                
+            end if;
+        end if;
+    end if;
+    PREPARE stmt1 FROM @result; 
+    EXECUTE stmt1; 
+    DEALLOCATE PREPARE stmt1;
+END
 
 --PEMESANAN: menambahkan pemesanan anggota yang login (book.php)(TESTED)
 CREATE DEFINER=`root`@`localhost` PROCEDURE `tambahpemesanan`(
@@ -542,32 +560,37 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `semuapeminjaman`(
     IN emaillogin varchar(100)
 )
 BEGIN
+    set @result := "select *, GROUP_CONCAT(distinct namapengarang SEPARATOR ', ') as namapengarangConcat
+        from peminjaman
+            inner join anggota on anggota.email = peminjaman.email
+            inner join eksemplar on eksemplar.ideksemplar = peminjaman.ideksemplar
+            inner join buku on buku.idbuku = eksemplar.idbuku
+            inner join bukupengarang on bukupengarang.idbuku = buku.idbuku
+            inner join pengarang on pengarang.idpengarang = bukupengarang.idpengarang ";
     if (emaillogin not like '') then
-    
-        select *, GROUP_CONCAT(distinct namapengarang SEPARATOR ', ') as namapengarangConcat
-        from peminjaman
-            inner join anggota on anggota.email = peminjaman.email
-            inner join eksemplar on eksemplar.ideksemplar = peminjaman.ideksemplar
-            inner join buku on buku.idbuku = eksemplar.idbuku
-            inner join bukupengarang on bukupengarang.idbuku = buku.idbuku
-            inner join pengarang on pengarang.idpengarang = bukupengarang.idpengarang
-        where peminjaman.email like emaillogin && peminjaman.statuspeminjaman like statusdicari
-        group by eksemplar.ideksemplar
-        order by peminjaman.bataspengembalian asc;
-    
+        if(statusdicari != '') then
+            set @result = concat(@result,"where peminjaman.email like '", emaillogin,"' && peminjaman.statuspeminjaman like '",statusdicari,"' 
+            group by eksemplar.ideksemplar
+            order by peminjaman.bataspengembalian asc;");
+        else
+            set @result = concat(@result,"where peminjaman.email like '", emaillogin, "' 
+            group by eksemplar.ideksemplar
+            order by peminjaman.idpeminjaman asc;");
+        end if;
     else
-        select *, GROUP_CONCAT(distinct namapengarang SEPARATOR ', ') as namapengarangConcat
-        from peminjaman
-            inner join anggota on anggota.email = peminjaman.email
-            inner join eksemplar on eksemplar.ideksemplar = peminjaman.ideksemplar
-            inner join buku on buku.idbuku = eksemplar.idbuku
-            inner join bukupengarang on bukupengarang.idbuku = buku.idbuku
-            inner join pengarang on pengarang.idpengarang = bukupengarang.idpengarang
-        where peminjaman.statuspeminjaman like statusdicari
-        group by eksemplar.ideksemplar
-        order by peminjaman.bataspengembalian asc;
-    
+        if(statusdicari != '') then
+            set @result = concat(@result,"where peminjaman.statuspeminjaman like '", statusdicari, "' 
+            group by eksemplar.ideksemplar
+            order by peminjaman.bataspengembalian asc;");
+        else
+            set @result = concat(@result,
+            "group by eksemplar.ideksemplar
+            order by peminjaman.idpeminjaman asc;");
+        end if;
     end if;
+    PREPARE stmt1 FROM @result; 
+    EXECUTE stmt1; 
+    DEALLOCATE PREPARE stmt1;
 END
 
 --PEMINJAMAN: Mengupdate hari terlambat dan besar denda (borrows.php)(TESTED)
@@ -667,39 +690,45 @@ END //
 
 --PEMINJAMAN: Mencari seluruh peminjaman (borrows.php)(TESTED)
 CREATE DEFINER=`root`@`localhost` PROCEDURE `caripeminjaman`(
-	IN pilihanpencarian varchar(100),
-	IN keyword varchar(100),
-	IN statusdicari varchar(100)
+    IN pilihanpencarian varchar(100),
+    IN keyword varchar(100),
+    IN statusdicari varchar(100)
 )
 BEGIN
-	set keyword = concat('%',keyword,'%');
-
-	if (pilihanpencarian like 'buku') then
-	
-		select *
-		from peminjaman
-			inner join anggota on anggota.email = peminjaman.email
-			inner join eksemplar on eksemplar.ideksemplar = peminjaman.ideksemplar
-			inner join buku on buku.idbuku = eksemplar.idbuku
-			inner join bukupengarang on bukupengarang.idbuku = buku.idbuku
-			inner join pengarang on pengarang.idpengarang = bukupengarang.idpengarang
-		where buku.judulbuku like keyword and peminjaman.statuspeminjaman like statusdicari
-		order by peminjaman.bataspengembalian asc;
-	
-	elseif (pilihanpencarian like 'anggota') then
-	
-		select *
-		from peminjaman
-			inner join anggota on anggota.email = peminjaman.email
-			inner join eksemplar on eksemplar.ideksemplar = peminjaman.ideksemplar
-			inner join buku on buku.idbuku = eksemplar.idbuku
-			inner join bukupengarang on bukupengarang.idbuku = buku.idbuku
-			inner join pengarang on pengarang.idpengarang = bukupengarang.idpengarang
-		where anggota.nama like keyword and peminjaman.statuspeminjaman like statusdicari
-		order by peminjaman.bataspengembalian asc;
-	
-	end if;
-END //
+    set keyword = concat('%',keyword,'%');
+    set @result = "select *, GROUP_CONCAT(distinct namapengarang SEPARATOR ', ') as namapengarangConcat
+        from peminjaman
+            inner join anggota on anggota.email = peminjaman.email
+            inner join eksemplar on eksemplar.ideksemplar = peminjaman.ideksemplar
+            inner join buku on buku.idbuku = eksemplar.idbuku
+            inner join bukupengarang on bukupengarang.idbuku = buku.idbuku
+            inner join pengarang on pengarang.idpengarang = bukupengarang.idpengarang ";
+    if (pilihanpencarian like 'buku') then
+        if(statusdicari != '') then
+            set @result = concat(@result,"where buku.judulbuku like '", keyword,"' and peminjaman.statuspeminjaman like '", statusdicari, "' 
+            group by eksemplar.ideksemplar
+            order by peminjaman.bataspengembalian asc;");
+        else
+            set @result = concat(@result,"where buku.judulbuku like '", keyword,"' 
+            group by eksemplar.ideksemplar
+            order by peminjaman.idpeminjaman asc;");
+        end if;
+    
+    elseif (pilihanpencarian like 'anggota') then
+        if(statusdicari != '') then
+            set @result = concat(@result,"where anggota.nama like '", keyword,"' and peminjaman.statuspeminjaman like '", statusdicari, "' 
+            group by eksemplar.ideksemplar
+            order by peminjaman.bataspengembalian asc;");
+        else
+            set @result = concat(@result,"where anggota.nama like '", keyword,"' 
+            group by eksemplar.ideksemplar
+            order by peminjaman.bataspengembalian asc;");
+        end if;
+    end if;
+    PREPARE stmt1 FROM @result; 
+    EXECUTE stmt1; 
+    DEALLOCATE PREPARE stmt1;
+END
 
 --PEMINJAMAN: Menambahkan peminjaman (borrows.php)(TESTED)
 CREATE DEFINER=`root`@`localhost` PROCEDURE `tambahpeminjaman`(

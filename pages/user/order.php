@@ -41,6 +41,7 @@
 						<select name="pilihan" class="cari">
 							<option value="buku">Book</option>
 						</select>
+						<input type="hidden" name="showAll" value="all">
 						<input id="button" name="iSearch" type="submit" value="SEARCH" class="cari">
 					</form>
 				</div>
@@ -50,12 +51,20 @@
 						<?php
 							$emaillogin = $_SESSION['email'];
 							$querypemesanan = "CALL semuapemesanan('WAITING','$emaillogin');";
+
+							if(isset($_GET['showAll'])){
+								$querypemesanan = "CALL semuapemesanan('','$emaillogin');";
+							}
 							
 							if(isset($_GET['iSearch'])){
 								$keyword = $_GET['textInput'];
 								$pilihanpencarian = $_GET['pilihan'];
 
 								$querypemesanan = "CALL caripemesanan('$pilihanpencarian','$keyword','WAITING','$emaillogin');";
+
+								if(isset($_GET['showAll'])){
+									$querypemesanan = "CALL caripemesanan('$pilihanpencarian','$keyword','','$emaillogin');";
+								}
 							}
 							
 							if($result = $query->query($querypemesanan)){

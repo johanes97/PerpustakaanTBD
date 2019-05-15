@@ -54,6 +54,7 @@
 							<option value="anggota">Member</option>
 							<option value="buku">Book</option>
 						</select>
+						<input type="hidden" name="showAll" value="all">
 						<input id="button" name="iSearch" type="submit" value="SEARCH" class="cari">
 						<input id="button2" name="iAdd" type="submit" value="ADD" class="cari">
 					</form>
@@ -66,12 +67,18 @@
 							$conn->executeNonQuery($queryupdatepeminjaman);
 							
 							$querypeminjaman = "CALL semuapeminjaman('ACTIVE','');";
+							if(isset($_GET['showAll'])){
+								$querypeminjaman = "CALL semuapeminjaman('','');";
+							}
 							
 							if(isset($_GET['iSearch'])){
 								$keyword = $_GET['textInput'];
 								$pilihanpencarian = $_GET['pilihan'];
 
 								$querypeminjaman = "CALL caripeminjaman('$pilihanpencarian','$keyword','ACTIVE');";
+								if(isset($_GET['showAll'])){
+									$querypeminjaman = "CALL caripeminjaman('$pilihanpencarian','$keyword','');";
+								}
 							}
 							
 							if($result = $query->query($querypeminjaman)){

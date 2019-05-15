@@ -34,6 +34,9 @@
 						<?php
 							$emaillogin = $_SESSION['email'];
 							$querypeminjaman = "CALL semuapeminjaman('ACTIVE','$emaillogin');";
+							if(isset($_GET['showAll'])){
+								$querypeminjaman = "CALL semuapeminjaman('','$emaillogin');";
+							}
 							
 							if($result = $query->query($querypeminjaman)){
 								while($row = $result->fetch_array()){

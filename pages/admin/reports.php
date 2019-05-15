@@ -38,6 +38,11 @@
 							<th><input id="button" name="btncekpengarang" type="submit" value="CEK" class="cari"></th>
 							<th><input id="button" name="btncektag" type="submit" value="CEK" class="cari"></th>
 						</tr>
+						<tr><th>History Borrowed Books</th><th>History Ordered Books</th><th></th></tr>
+						<tr>
+							<th><input id="button" name="btnpeminjamanbuku" type="submit" value="CEK" class="cari"></th>
+							<th><input id="button" name="btnpemesananbuku" type="submit" value="CEK" class="cari"></th>
+						</tr>
 						</form>
 					</table>
 				</div>
@@ -133,5 +138,13 @@
 	
 	if(isset($_GET['btncektag'])){
 		echo "<script>modalOn();</script>";
+	}
+
+	if(isset($_GET['btnpeminjamanbuku'])){
+		Header("Location: borrows.php?showAll=".'all');
+	}
+
+	if(isset($_GET['btnpemesananbuku'])){
+		Header("Location: orders.php?showAll=".'all');
 	}
 ?>
