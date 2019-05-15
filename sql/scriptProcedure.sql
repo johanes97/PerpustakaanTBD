@@ -1383,28 +1383,3 @@ BEGIN
         FROM tag;
     end if;
 END
-
--- Procedure untuk mencari satu pengarang atau tag
-CREATE DEFINER=`root`@`localhost` PROCEDURE `search_one`(
-    IN book varchar(100), 
-    IN author varchar(100)
-)
-BEGIN
-    DECLARE idBuku INT DEFAULT 0;
-    DECLARE idPengarang INT DEFAULT 0;
-    if(book != '') then
-        SELECT buku.idbuku
-        INTO idBuku
-        FROM buku
-        WHERE judulbuku LIKE CONCAT('%', book, '%')
-        LIMIT 1;
-    end if;
-    if(author != '') then
-        SELECT pengarang.idpengarang
-        INTO idPengarang
-        FROM pengarang
-        WHERE namapengarang LIKE CONCAT('%', author, '%')
-        LIMIT 1;
-    end if;
-    select idBuku, idPengarang;
-END
