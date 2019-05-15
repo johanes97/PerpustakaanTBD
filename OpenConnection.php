@@ -6,7 +6,7 @@ class MySQLDB{
 	protected $socket   = "";
 	protected $user = "root";
 	protected $password = "";
-	protected $dbname = "jfalibrary";   
+	protected $dbname = "jfalibraryfinal";   
 
 	protected $db_connection;
 

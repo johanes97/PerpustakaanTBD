@@ -76,7 +76,9 @@
 									echo "<td>" . $row['tglpemesanan'] . "</td>";
 									echo "<td>" . $row['statuspemesanan'] . "</td>";
 									echo "<input name='idpemesanandihapus' type='hidden' value='" . $row['idpemesanan'] . "'>";
-									echo "<td><input name='cancelbutton' type='submit' value='CANCEL' class='iBForm'></td>";
+									if(!isset($_GET['showAll'])){
+										echo "<td><input name='cancelbutton' type='submit' value='CANCEL' class='iBForm'></td>";
+									}
 									echo "</tr>";
 									
 									echo "</form>";

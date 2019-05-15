@@ -40,7 +40,7 @@
 								while($row = $result->fetch_array()){echo "<tr>";
 									echo "<td>" . $row['idbuku'] . "</td>";
 									echo "<td>" . $row['judulbuku'] . "</td>";
-									echo "<td>" . $row['namapengarang'] . "</td>";
+									echo "<td>" . $row['namapengarangconcat'] . "</td>";
 									echo "</tr>";
 								}
 							}

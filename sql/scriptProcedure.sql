@@ -361,51 +361,50 @@ BEGIN
 END
 
 -- BUKU: Mendapatkan rekomendasi buku untuk anggota yang login (recommendation.php)
-CREATE DEFINER=`root`@`localhost` PROCEDURE `rekomendasibuku`(
-	IN emaillogin varchar(100)
+ CREATE DEFINER=`root`@`localhost` PROCEDURE `rekomendasibuku`(
+    IN emaillogin varchar(100)
 )
 BEGIN
-	-- cari total peminjaman setiap tag dari setiap buku yang pernah seorang anggota pinjam (value setiap tag)(SUDAH BENAR)
-	drop temporary table if exists tmpjumlahpeminjamantag;
-	create temporary table tmpjumlahpeminjamantag as
-		select tag.idtag, tag.namatag, count(tag.idtag) as 'tagcount'
-		from peminjaman
-			inner join eksemplar on eksemplar.ideksemplar = peminjaman.ideksemplar
-			inner join buku on buku.idbuku = eksemplar.idbuku
-			inner join bukutag on bukutag.idbuku = buku.idbuku
-			inner join tag on tag.idtag = bukutag.idtag
-		where peminjaman.email like emaillogin
-		group by tag.idtag
-		order by tagcount desc;
-
-	-- cari semua buku dan urutkan berdasarkan book value (book value = total value dari tag-tag yang dimiliki buku)(SUDAH BENAR)
-	drop temporary table if exists tmpvaluebuku;
-	create temporary table tmpvaluebuku as
-		select buku.idbuku, buku.judulbuku, sum(tagcount) as 'bookvalue'
-		from buku
-			inner join bukutag on bukutag.idbuku = buku.idbuku
-			inner join tmpjumlahpeminjamantag on tmpjumlahpeminjamantag.idtag = bukutag.idtag
-		group by buku.idbuku
-		order by bookvalue desc;
-	
-	-- hapus buku yang sedang dipinjam
-	drop temporary table if exists tmpvaluebuku2;
-	create temporary table tmpvaluebuku2 as
-		select tmpvaluebuku.idbuku, tmpvaluebuku.judulbuku, tmpvaluebuku.bookvalue
-		from peminjaman
-			inner join eksemplar on eksemplar.ideksemplar = peminjaman.ideksemplar
-			right outer join tmpvaluebuku on tmpvaluebuku.idbuku = eksemplar.idbuku
-		where peminjaman.email like emaillogin and (peminjaman.statuspeminjaman like 'INACTIVE' or peminjaman.statuspeminjaman is null)
-		group by tmpvaluebuku.idbuku
-		order by bookvalue desc;
-	
-	-- menambahkan nama pengarang
-	select tmpvaluebuku2.idbuku, tmpvaluebuku2.judulbuku, pengarang.namapengarang, tmpvaluebuku2.bookvalue
-	from tmpvaluebuku2
-		inner join bukupengarang on bukupengarang.idbuku = tmpvaluebuku2.idbuku
-		inner join pengarang on pengarang.idpengarang = bukupengarang.idpengarang
-	order by bookvalue desc;
-END //
+    -- cari total peminjaman setiap tag dari setiap buku yang pernah seorang anggota pinjam (value setiap tag)(SUDAH BENAR)
+    drop temporary table if exists tmpjumlahpeminjamantag;
+    create temporary table tmpjumlahpeminjamantag as
+        select tag.idtag, tag.namatag, count(tag.idtag) as 'tagcount'
+        from peminjaman
+            inner join eksemplar on eksemplar.ideksemplar = peminjaman.ideksemplar
+            inner join buku on buku.idbuku = eksemplar.idbuku
+            inner join bukutag on bukutag.idbuku = buku.idbuku
+            inner join tag on tag.idtag = bukutag.idtag
+        where peminjaman.email like emaillogin
+        group by tag.idtag
+        order by tagcount desc;
+    
+    -- cari semua buku dan urutkan berdasarkan book value (book value = total value dari tag-tag yang dimiliki buku)(SUDAH BENAR)
+    drop temporary table if exists tmpvaluebuku;
+    create temporary table tmpvaluebuku as
+        select buku.idbuku, buku.judulbuku, sum(tagcount) as 'bookvalue'
+        from buku
+            inner join bukutag on bukutag.idbuku = buku.idbuku
+            inner join tmpjumlahpeminjamantag on tmpjumlahpeminjamantag.idtag = bukutag.idtag
+        group by buku.idbuku
+        order by bookvalue desc;
+    
+    -- hapus buku yang sedang dipinjam
+    drop temporary table if exists tmpvaluebuku2;
+    create temporary table tmpvaluebuku2 as
+        select tmpvaluebuku.idbuku, tmpvaluebuku.judulbuku, tmpvaluebuku.bookvalue
+        from eksemplar
+            right outer join tmpvaluebuku on tmpvaluebuku.idbuku = eksemplar.idbuku
+        group by tmpvaluebuku.idbuku
+        order by bookvalue desc;
+    
+    -- menambahkan nama pengarang
+    select tmpvaluebuku2.idbuku, tmpvaluebuku2.judulbuku, GROUP_CONCAT(distinct namapengarang SEPARATOR ', ') as namapengarangconcat, tmpvaluebuku2.bookvalue
+    from tmpvaluebuku2
+        inner join bukupengarang on bukupengarang.idbuku = tmpvaluebuku2.idbuku
+        inner join pengarang on pengarang.idpengarang = bukupengarang.idpengarang
+    group by idbuku
+    order by bookvalue desc;
+END
 
 
 
@@ -732,26 +731,26 @@ END
 
 --PEMINJAMAN: Menambahkan peminjaman (borrows.php)(TESTED)
 CREATE DEFINER=`root`@`localhost` PROCEDURE `tambahpeminjaman`(
-	IN emailpeminjam varchar(100),
-	IN idbukudipinjam int,
-	IN bataspeminjaman date
+    IN emailpeminjam varchar(100),
+    IN idbukudipinjam int,
+    IN bataspeminjaman date
 )
 BEGIN
-	declare ideksemplardipinjam int;
-	
-	select eksemplar.ideksemplar
-	into ideksemplardipinjam
-	from eksemplar
-	where eksemplar.idbuku = idbukudipinjam and eksemplar.status = 0
-	limit 1;
-	
-	insert into peminjaman(email,ideksemplar,tglpeminjaman,bataspengembalian,durasihariterlambat,besardenda,statuspeminjaman)
-	values (emailpeminjam,ideksemplardipinjam,now(),bataspeminjaman,0,0,'ACTIVE');
-	
-	update eksemplar
-	set eksemplar.status = 1
-	where eksemplar.ideksemplar = ideksemplardipinjam;
-END //
+    declare ideksemplardipinjam int;
+    
+    select eksemplar.ideksemplar
+    into ideksemplardipinjam
+    from eksemplar
+    where eksemplar.idbuku = idbukudipinjam and eksemplar.status = 0 and eksemplar.deleted = 0
+    limit 1;
+    
+    insert into peminjaman(email,ideksemplar,tglpeminjaman,bataspengembalian,durasihariterlambat,besardenda,statuspeminjaman)
+    values (emailpeminjam,ideksemplardipinjam,now(),bataspeminjaman,0,0,'ACTIVE');
+    
+    update eksemplar
+    set eksemplar.status = 1
+    where eksemplar.ideksemplar = ideksemplardipinjam;
+END
 
 --PEMINJAMAN: Menghapus peminjaman (borrows.php)(TESTED)
 CREATE DEFINER=`root`@`localhost` PROCEDURE `hapuspeminjaman`(

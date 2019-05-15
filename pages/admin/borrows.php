@@ -94,7 +94,9 @@
 									echo "<td>" . $row['durasihariterlambat'] . "</td>";
 									echo "<td>" . $row['besardenda'] . "</td>";
 									echo "<input name='idpeminjamandihapus' type='hidden' value='" . $row['idpeminjaman'] . "'>";
-									echo "<td><input name='deletebutton' type='submit' value='INACTIVATE' class='iBForm'></td>";
+									if(!isset($_GET['showAll'])){
+										echo "<td><input name='deletebutton' type='submit' value='INACTIVATE' class='iBForm'></td>";
+									}
 									echo "</tr>";
 									
 									echo "</form>";

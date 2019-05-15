@@ -76,7 +76,9 @@
 									echo "<td>" . $row['nama'] . "</td>";
 									echo "<td>" . $row['tglpemesanan'] . "</td>";
 									echo "<input name='idpemesananditerima' type='hidden' value='" . $row['idpemesanan'] . "'>";
-									echo "<td><input name='acceptbutton' type='submit' value='ACCEPT' class='iBForm'></td>";
+									if(!isset($_GET['showAll'])){
+										echo "<td><input name='acceptbutton' type='submit' value='ACCEPT' class='iBForm'></td>";
+									}
 									echo "</tr>";
 									
 									echo "</form>";

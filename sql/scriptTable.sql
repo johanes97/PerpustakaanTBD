@@ -1,4 +1,4 @@
--- Nama basis data: perpustakaantbd
+-- Nama basis data: jfalibraryfinal
 
 -- Bagian Buku
 create table buku(
