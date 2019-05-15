@@ -361,7 +361,7 @@ BEGIN
 END
 
 -- BUKU: Mendapatkan rekomendasi buku untuk anggota yang login (recommendation.php)
- CREATE DEFINER=`root`@`localhost` PROCEDURE `rekomendasibuku`(
+CREATE DEFINER=`root`@`localhost` PROCEDURE `rekomendasibuku`(
     IN emaillogin varchar(100)
 )
 BEGIN
@@ -394,6 +394,7 @@ BEGIN
         select tmpvaluebuku.idbuku, tmpvaluebuku.judulbuku, tmpvaluebuku.bookvalue
         from eksemplar
             right outer join tmpvaluebuku on tmpvaluebuku.idbuku = eksemplar.idbuku
+        where eksemplar.status = 0 and eksemplar.deleted = 0
         group by tmpvaluebuku.idbuku
         order by bookvalue desc;
     

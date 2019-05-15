@@ -27,17 +27,6 @@
 			echo "<script>console.log('masuk')</script>";
 			$queryInsertBukuPengarangTag = "call insert_book_author_tag_word('$judulbuku','$namapengarang','$tag')";
 			$conn->executeNonQuery($queryInsertBukuPengarangTag);
-			
-			// $queryGetIdBukuIdPengarang = "call search_id_book_and_id_author('$judulbuku','$namapengarang')";		
-			// $resultIdBukuIdPengarang = $query->query($queryGetIdBukuIdPengarang);
-			// $rowIdBukuIdPengarang = $resultIdBukuIdPengarang->fetch_array();
-
-			// $idbuku = $rowIdBukuIdPengarang['idBuku'];
-			// $idpengarang = $rowIdBukuIdPengarang['idPengarang'];
-
-			//$conn->freeResult();
-
-			//echo "<script>document.getElementById('tambahBuku').innerHTML = 'Book Added'</script>";
 		}
 	}
 ?>
